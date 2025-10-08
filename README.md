@@ -1,16 +1,54 @@
-# React + Vite
+# Sistema de Gestión de Sobres para Óptica - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este es el frontend para una aplicación de gestión de sobres para una óptica, desarrollado con React y Vite.
 
-Currently, two official plugins are available:
+## Requisitos Previos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu sistema:
 
-## React Compiler
+- [Node.js](https://nodejs.org/) (se recomienda la versión LTS)
+- [Git](https://git-scm.com/)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Instalación y Ejecución
 
-## Expanding the ESLint configuration
+Sigue estos pasos para clonar el repositorio y ejecutar el proyecto en tu máquina local.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1.  **Clona el repositorio desde GitHub:**
+
+    ```bash
+    git clone https://github.com/nmbenvino/ppyl-optica-frontend.git
+    ```
+
+2.  **Navega al directorio del proyecto:**
+
+    ```bash
+    cd ppyl-optica-frontend
+    ```
+
+3.  **Instala las dependencias:**
+
+    El proyecto utiliza `npm` para la gestión de paquetes. Ejecuta el siguiente comando en la raíz del proyecto para instalar todas las dependencias necesarias.
+
+    ```bash
+    npm install
+    ```
+
+4.  **Inicia el servidor de desarrollo:**
+
+    Una vez que las dependencias estén instaladas, puedes iniciar el servidor de desarrollo de Vite.
+
+    ```bash
+    npm run dev
+    ```
+
+5.  **Abre la aplicación:**
+
+    El servidor se iniciará y la aplicación estará disponible en tu navegador, generalmente en la siguiente URL: http://localhost:5173 npm run dev
+
+    ```
+
+    ```
+
+6.  **Abre la aplicación:**
+
+    El servidor se iniciará y la aplicación estará disponible en tu navegador, generalmente en la siguiente URL: http://localhost:5173
