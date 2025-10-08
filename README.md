@@ -43,8 +43,8 @@ Sigue estos pasos para clonar el repositorio y ejecutar el proyecto en tu máqui
 
 5.  **Abre la aplicación:**
 
-    El servidor se iniciará y la aplicación estará disponible en tu navegador, generalmente en la siguiente URL: http://localhost:5173 npm run dev
-
-6.  **Abre la aplicación:**
-
     El servidor se iniciará y la aplicación estará disponible en tu navegador, generalmente en la siguiente URL: http://localhost:5173
+
+    ```bash
+    npm run dev
+    ```
