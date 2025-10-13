@@ -1,10 +1,14 @@
 /**
  * Este archivo contiene todos los servicios para interactuar con la API de sobres.
  */
+import {
+  mockAllSobresResponse,
+  mockFilteredCustomerResponse,
+} from "@services/_mockData.js";
 
-const API_BASE_URL = "http://localhost:3000/api"; // Cambia esto por la URL real de tu backend
-const USE_MOCK_DATA = true;
-const MOCK_DELAY = 500;
+const API_BASE_URL = "http://localhost:3000/api";
+const USE_MOCK_DATA = true; // Cambiar a false para usar la API real
+const MOCK_DELAY = 500; // Simula la latencia de la red
 
 /**
  * Realiza una petición fetch y maneja la respuesta y los errores.
@@ -15,25 +19,50 @@ const MOCK_DELAY = 500;
  */
 const apiFetch = async (endpoint, options = {}) => {
   // Inicio del mock, despues se va a eliminar junto con USE_MOCK_DATA (linea 6) Y MOCK_DELAY (linea 7)
+  // --- Simulación con mock data ---
   if (USE_MOCK_DATA) {
-    const mockData = await import("@services/_mockData.js");
     return new Promise((resolve) => {
       setTimeout(() => {
+        console.log(
+          `[MOCK] Calling endpoint: ${endpoint}`,
+          options.body ? JSON.parse(options.body) : ""
+        );
         switch (endpoint) {
-          case "/get_all_sobres":
-            resolve(mockData.mockAllSobresResponse);
+          case "/getSobre":
+            // Simula tanto la búsqueda por DNI como la general (que antes era get_all_sobres)
+            {
+              const body = options.body ? JSON.parse(options.body) : {};
+              let filteredData = mockAllSobresResponse.sobres;
+
+              if (body.dni) {
+                filteredData = filteredData.filter(
+                  (sobre) => sobre.cliente.dni === body.dni
+                );
+              }
+
+              if (body.date_ini && body.date_fin) {
+                filteredData = filteredData.filter(
+                  (sobre) =>
+                    sobre.sobre_date >= body.date_ini &&
+                    sobre.sobre_date <= body.date_fin
+                );
+              }
+              resolve({ data: filteredData });
+            }
             break;
-          case "/filtrar_customer":
-            resolve(mockData.mockFilteredCustomerResponse);
-            break;
+          case "/add_sobre":
+          case "/update_sobre":
+          case "/deleteSobre":
           default:
-            resolve({ message: "Operación simulada exitosa" });
+            resolve({
+              message: "Operación simulada exitosa",
+              detail: `Endpoint ${endpoint} llamado.`,
+            });
             break;
         }
       }, MOCK_DELAY);
     });
   }
-  // Fin del mock
 
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -57,39 +86,25 @@ const apiFetch = async (endpoint, options = {}) => {
 };
 
 /**
- * Obtiene todos los sobres dentro de un rango de fechas.
- * Corresponde al endpoint `/get_all_sobres`.
- * @param {string} date_ini - Fecha de inicio (formato YYYY-MM-DD).
- * @param {string} date_fin - Fecha de fin (formato YYYY-MM-DD).
- * @returns {Promise<Object>} La lista de sobres.
- */
-export const getSobresByMonth = (date_ini, date_fin) => {
-  return apiFetch("/get_all_sobres", {
-    method: "POST",
-    body: JSON.stringify({ date_ini, date_fin }),
-  });
-};
-
-/**
- * Filtra sobres por nombre de cliente y/o rango de fechas.
- * Corresponde al endpoint `/filtrar_customer`.
+ * Obtiene sobres filtrando por DNI y/o rango de fechas.
+ * Corresponde al endpoint `/getSobre`.
  * @param {Object} filters - Objeto con los filtros.
- * @param {string} filters.username - Nombre del cliente a buscar.
- * @param {string|null} filters.date_ini - Fecha de inicio (opcional).
- * @param {string|null} filters.date_fin - Fecha de fin (opcional).
- * @returns {Promise<Object>} Los datos del cliente y sus sobres.
+ * @param {number|null} filters.dni - DNI del cliente a buscar.
+ * @param {string|null} filters.date_ini - Fecha de inicio (opcional, YYYY-MM-DD).
+ * @param {string|null} filters.date_fin - Fecha de fin (opcional, YYYY-MM-DD).
+ * @returns {Promise<{data: import('@services/_mockData').Sobre[]}>} La lista de sobres.
  */
-export const filterCustomer = ({ username, date_ini, date_fin }) => {
-  return apiFetch("/filtrar_customer", {
+export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
+  return apiFetch("/getSobre", {
     method: "POST",
-    body: JSON.stringify({ username, date_ini, date_fin }),
+    body: JSON.stringify({ dni, date_ini, date_fin }),
   });
 };
 
 /**
  * Crea un nuevo sobre.
  * Corresponde al endpoint `/add_sobre`.
- * @param {Object} data - Los datos del sobre y del cliente (si es nuevo).
+ * @param {Object} data - Los datos del sobre, cliente y lentes, según la especificación de la API.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const addSobre = (data) => {
@@ -101,14 +116,16 @@ export const addSobre = (data) => {
 
 /**
  * Elimina un sobre por su número.
- * Corresponde al endpoint `/del_sobre`.
- * @param {number} sobre_number - El número del sobre a eliminar.
+ * Corresponde al endpoint `/deleteSobre`.
+ * @param {Object} params - Los parámetros para eliminar.
+ * @param {number} params.dni - El DNI del cliente asociado al sobre.
+ * @param {number} params.sobre_number - El número del sobre a eliminar.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
-export const deleteSobre = (sobre_number) => {
-  return apiFetch("/del_sobre", {
-    method: "DELETE", // Usamos DELETE, pero el cuerpo se envía como en la especificación.
-    body: JSON.stringify({ sobre_number }),
+export const deleteSobre = ({ dni, sobre_number }) => {
+  return apiFetch("/deleteSobre", {
+    method: "POST", // Se usa POST para poder enviar un cuerpo JSON cómodamente.
+    body: JSON.stringify({ dni, sobre_number }),
   });
 };
 
@@ -120,18 +137,17 @@ export const deleteSobre = (sobre_number) => {
  */
 export const updateSobre = (data) => {
   return apiFetch("/update_sobre", {
-    method: "PUT", // PUT o PATCH son semánticamente correctos para actualizaciones.
+    method: "PUT",
     body: JSON.stringify(data),
   });
 };
 
 /**
  * Busca un usuario para precargar sus datos.
- * Esta función podría reutilizar `filterCustomer` o apuntar a un nuevo endpoint si fuera necesario.
- * @param {string} username - El nombre del usuario a buscar.
+ * Reutiliza `getSobres` para buscar por DNI.
+ * @param {number} dni - El DNI del usuario a buscar.
  * @returns {Promise<Object>} Los datos del cliente y sus sobres.
  */
-export const searchUser = (username) => {
-  // Reutilizamos la función de filtro, pasando fechas nulas.
-  return filterCustomer({ username, date_ini: null, date_fin: null });
+export const searchUser = (dni) => {
+  return getSobres({ dni });
 };

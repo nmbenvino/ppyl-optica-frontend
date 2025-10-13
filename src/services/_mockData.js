@@ -7,8 +7,8 @@
 /**
  * @typedef {Object} Eye
  * @property {number} id_eye
- * @property {'cerca' | 'lejos' | 'bifocal'} type
- * @property {'od' | 'oi'} eye
+ * @property {'cerca' | 'lejos' | 'bifocal'} type - El tipo de lente
+ * @property {'od' | 'oi'} lens - El lado del ojo (Ojo Derecho / Ojo Izquierdo)
  * @property {number} esf
  * @property {number} cil
  * @property {number} eje
@@ -21,7 +21,7 @@
  * @property {string} frame
  * @property {string} organic
  * @property {string} mineral
- * @property {Eye[]} eyes
+ * @property {Eye[]} lenss - Array de lentes
  */
 
 /**
@@ -47,7 +47,7 @@
  * @property {number} pay
  * @property {string} sobre_date - Formato YYYY-MM-DD
  * @property {Glasses} glasses
- * @property {Partial<Customer>} [cliente] - Cliente asociado, puede ser parcial.
+ * @property {Customer} cliente - Cliente asociado al sobre.
  */
 
 /**
@@ -55,14 +55,6 @@
  * @type {{cliente: Customer, sobres: Sobre[]}}
  */
 export const mockFilteredCustomerResponse = {
-  cliente: {
-    id_customer: 123,
-    customer_name: "Juan",
-    last_name: "Pérez",
-    dni: 12345678,
-    address: "Calle Falsa 123",
-    phone: "1234-5678",
-  },
   sobres: [
     {
       id_sobre: 456,
@@ -71,29 +63,37 @@ export const mockFilteredCustomerResponse = {
       billing: "Factura A",
       recipe: "Receta 1",
       observations: "Lente antireflex",
-      total: 1500.0,
+      total: 15000.0,
       advance_payment: 500.0,
-      pay: 1000.0,
-      sobre_date: "2024-07-15",
+      pay: 14500.0,
+      sobre_date: "2025-10-02",
+      cliente: {
+        id_customer: 123,
+        customer_name: "Juan",
+        last_name: "Pérez",
+        dni: 12345678,
+        address: "Calle Falsa 123",
+        phone: "1234-5678",
+      },
       glasses: {
         id_glasses: 111,
         color: "Negro",
         frame: "Metal",
         organic: "Sí",
         mineral: "No",
-        eyes: [
+        lenss: [
           {
-            id_eye: 1001,
+            id_lens: 1001,
             type: "cerca",
-            eye: "od",
+            lens: "od",
             esf: -1.25,
             cil: -0.5,
             eje: 90,
           },
           {
-            id_eye: 1002,
+            id_lens: 1002,
             type: "cerca",
-            eye: "oi",
+            lens: "oi",
             esf: -1.0,
             cil: -0.25,
             eje: 80,
@@ -110,15 +110,8 @@ export const mockFilteredCustomerResponse = {
  */
 export const mockAllSobresResponse = {
   sobres: [
-    // Copiamos el sobre de Juan Pérez y le añadimos la info del cliente
-    {
-      ...mockFilteredCustomerResponse.sobres[0],
-      cliente: {
-        id_customer: 123,
-        customer_name: "Juan",
-        last_name: "Pérez",
-      },
-    },
+    // Sobre de Juan Pérez (el mismo que en la respuesta filtrada)
+    mockFilteredCustomerResponse.sobres[0],
     // Agregamos otro sobre para tener más datos
     {
       id_sobre: 457,
@@ -127,14 +120,17 @@ export const mockAllSobresResponse = {
       billing: "Factura B",
       recipe: "Receta 2",
       observations: "Lentes de sol con graduación",
-      total: 3200.0,
+      total: 32000.0,
       advance_payment: 1200.0,
-      pay: 2000.0,
-      sobre_date: "2024-07-20",
+      pay: 30800.0,
+      sobre_date: "2025-10-12",
       cliente: {
         id_customer: 124,
         customer_name: "Maria",
         last_name: "Gomez",
+        dni: 23456789,
+        address: "Av. Siempre Viva 123",
+        phone: "5555-4321",
       },
       glasses: {
         id_glasses: 112,
@@ -142,19 +138,19 @@ export const mockAllSobresResponse = {
         frame: "Plástico",
         organic: "Sí",
         mineral: "No",
-        eyes: [
+        lenss: [
           {
-            id_eye: 1003,
+            id_lens: 1003,
             type: "lejos",
-            eye: "od",
+            lens: "od",
             esf: -2.0,
             cil: -0.75,
             eje: 180,
           },
           {
-            id_eye: 1004,
+            id_lens: 1004,
             type: "lejos",
-            eye: "oi",
+            lens: "oi",
             esf: -2.25,
             cil: -0.5,
             eje: 175,
