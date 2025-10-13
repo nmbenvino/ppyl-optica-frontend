@@ -1,6 +1,15 @@
 import { Link, useParams } from "react-router-dom";
 import { useSobrePage } from "./useSobrePage";
-import { sobrePageStyles } from "./Styles";
+import {
+  sobrePageStyles,
+  formFieldStyles,
+  formSectionStyles,
+  lensTypeSectionStyles,
+  generalInfoStyles,
+  lensDetailsStyles,
+  otherFieldsStyles,
+  paymentDetailsStyles,
+} from "./Styles";
 import { homePageStyles } from "@pages/HomePage/Styles"; // Reutilizamos estilos de botones
 
 /**
@@ -14,13 +23,17 @@ import { homePageStyles } from "@pages/HomePage/Styles"; // Reutilizamos estilos
  * @returns {JSX.Element}
  */
 const FormField = ({ label, type = "text", name, disabled, ...props }) => (
-  <fieldset className={sobrePageStyles.fieldSet}>
-    <legend className={sobrePageStyles.legend}>{label}</legend>
+  <fieldset
+    className={`${formFieldStyles.fieldSet} ${
+      disabled ? formFieldStyles.disabled : ""
+    }`}
+  >
+    <legend className={formFieldStyles.legend}>{label}</legend>
     {type === "textarea" ? (
       <textarea
         id={name}
         name={name}
-        className={sobrePageStyles.textarea}
+        className={formFieldStyles.textarea}
         disabled={disabled}
         {...props}
       />
@@ -29,7 +42,7 @@ const FormField = ({ label, type = "text", name, disabled, ...props }) => (
         id={name}
         name={name}
         type={type}
-        className={sobrePageStyles.input}
+        className={formFieldStyles.input}
         step={type === "number" ? "any" : undefined}
         disabled={disabled}
         {...props}
@@ -46,11 +59,9 @@ const FormField = ({ label, type = "text", name, disabled, ...props }) => (
  * @returns {JSX.Element}
  */
 const FormSection = ({ title, children }) => (
-  <fieldset className={sobrePageStyles.section}>
-    <legend className={sobrePageStyles.sectionTitle}>{title}</legend>
-    <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {children}
-    </div>
+  <fieldset className={formSectionStyles.section}>
+    <legend className={formSectionStyles.sectionTitle}>{title}</legend>
+    <div className={formSectionStyles.sectionGrid}>{children}</div>
   </fieldset>
 );
 
@@ -66,8 +77,8 @@ const FormSection = ({ title, children }) => (
  * @returns {JSX.Element}
  */
 const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
-  <div className="col-span-full border-t border-gray-300 dark:border-gray-700 pt-4 mt-4 first:border-t-0 first:mt-0 first:pt-0">
-    <div className="flex items-center gap-2 mb-4">
+  <div className={lensTypeSectionStyles.container} key={type}>
+    <div className={lensTypeSectionStyles.radioContainer}>
       <input
         type="radio"
         id={`check_${type}`}
@@ -76,25 +87,26 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
         disabled={disabled}
         onChange={onChange}
         checked={value.tipo_lente === type} // Se marca si el valor en formData coincide
-        className="h-5 w-5 rounded"
+        className={lensTypeSectionStyles.radioInput}
       />
-      <label htmlFor={`check_${type}`} className="text-lg font-semibold">
+      <label
+        htmlFor={`check_${type}`}
+        className={lensTypeSectionStyles.radioLabel}
+      >
         {label}
       </label>
     </div>
     {/* OD */}
-    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
-      <span className="font-bold text-lg self-center text-right pr-2">
-        Ojo Derecho
-      </span>
+    <div className={lensTypeSectionStyles.grid}>
+      <span className={lensTypeSectionStyles.eyeLabel}>Ojo Derecho</span>
       <div className="md:col-span-2">
         <FormField
           label="Esf"
           type="number"
           name={`${type}_od_esf`}
           onChange={onChange}
-          value={value[`${type}_od_esf`] || ""}
-          disabled={disabled}
+          value={value.tipo_lente === type ? value[`${type}_od_esf`] || "" : ""}
+          disabled={disabled || value.tipo_lente !== type}
         />
       </div>
       <div className="md:col-span-2">
@@ -103,8 +115,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
           type="number"
           name={`${type}_od_cil`}
           onChange={onChange}
-          value={value[`${type}_od_cil`] || ""}
-          disabled={disabled}
+          value={value.tipo_lente === type ? value[`${type}_od_cil`] || "" : ""}
+          disabled={disabled || value.tipo_lente !== type}
         />
       </div>
       <div className="md:col-span-2">
@@ -113,24 +125,22 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
           type="number"
           name={`${type}_od_eje`}
           onChange={onChange}
-          value={value[`${type}_od_eje`] || ""}
-          disabled={disabled}
+          value={value.tipo_lente === type ? value[`${type}_od_eje`] || "" : ""}
+          disabled={disabled || value.tipo_lente !== type}
         />
       </div>
     </div>
     {/* OI */}
-    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center mt-2">
-      <span className="font-bold text-lg self-center text-right pr-2">
-        Ojo Izquierdo
-      </span>
+    <div className={`${lensTypeSectionStyles.grid} mt-2`}>
+      <span className={lensTypeSectionStyles.eyeLabel}>Ojo Izquierdo</span>
       <div className="md:col-span-2">
         <FormField
           label="Esf"
           type="number"
           name={`${type}_oi_esf`}
           onChange={onChange}
-          value={value[`${type}_oi_esf`] || ""}
-          disabled={disabled}
+          value={value.tipo_lente === type ? value[`${type}_oi_esf`] || "" : ""}
+          disabled={disabled || value.tipo_lente !== type}
         />
       </div>
       <div className="md:col-span-2">
@@ -139,8 +149,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
           type="number"
           name={`${type}_oi_cil`}
           onChange={onChange}
-          value={value[`${type}_oi_cil`] || ""}
-          disabled={disabled}
+          value={value.tipo_lente === type ? value[`${type}_oi_cil`] || "" : ""}
+          disabled={disabled || value.tipo_lente !== type}
         />
       </div>
       <div className="md:col-span-2">
@@ -149,8 +159,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
           type="number"
           name={`${type}_oi_eje`}
           onChange={onChange}
-          value={value[`${type}_oi_eje`] || ""}
-          disabled={disabled}
+          value={value.tipo_lente === type ? value[`${type}_oi_eje`] || "" : ""}
+          disabled={disabled || value.tipo_lente !== type}
         />
       </div>
     </div>
@@ -164,8 +174,14 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
  */
 const SobrePage = () => {
   const { action, id } = useParams();
-  const { loading, error, isFormDisabled, formData, handleChange } =
-    useSobrePage(action, id);
+  const {
+    loading,
+    error,
+    isFormDisabled,
+    formData,
+    handleChange,
+    handleSubmit,
+  } = useSobrePage(action, id);
 
   /**
    * Determina la etiqueta del botón de envío según la acción actual.
@@ -194,17 +210,26 @@ const SobrePage = () => {
       : homePageStyles.button.primary;
   };
 
+  // Helper para obtener la fecha local en formato YYYY-MM-DD
+  const getLocalDate = (date) => {
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().split("T")[0];
+  };
+  const today = getLocalDate(new Date());
   if (loading) {
     return (
       <div className={sobrePageStyles.container}>
-        Cargando datos del sobre...
+        {sobrePageStyles.loadingText}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={`${sobrePageStyles.container} text-red-500`}>
+      <div
+        className={`${sobrePageStyles.container} ${sobrePageStyles.errorText}`}
+      >
         Error: {error}
       </div>
     );
@@ -212,17 +237,17 @@ const SobrePage = () => {
 
   return (
     <div className={sobrePageStyles.container}>
-      <h1 className="text-3xl font-bold mb-6 capitalize">
-        {action} Sobre {id && `#${id}`}
+      <h1 className={sobrePageStyles.pageTitle}>
+        {action} Sobre {id && `#${formData.numero_sobre || id}`}
       </h1>
 
-      <form className={sobrePageStyles.formContainer}>
+      <form className={sobrePageStyles.formContainer} onSubmit={handleSubmit}>
         {/* --- 1. Información General --- */}
-        <fieldset className={sobrePageStyles.section}>
-          <legend className={sobrePageStyles.sectionTitle}>
+        <fieldset className={formSectionStyles.section}>
+          <legend className={formSectionStyles.sectionTitle}>
             Información General
           </legend>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={generalInfoStyles.grid}>
             <FormField
               label="Fecha"
               type="date"
@@ -230,6 +255,7 @@ const SobrePage = () => {
               disabled={isFormDisabled}
               onChange={handleChange}
               value={formData.fecha || ""}
+              max={today}
             />
             <FormField
               label="N° Sobre"
@@ -265,7 +291,7 @@ const SobrePage = () => {
             />
             <FormField
               label="Teléfono"
-              type="number"
+              type="text"
               name="telefono"
               disabled={isFormDisabled}
               onChange={handleChange}
@@ -276,32 +302,10 @@ const SobrePage = () => {
 
         {/* --- 2. Tipo de Lente --- */}
         <FormSection title="Tipo de Lente">
-          <LensTypeSection
-            type="lejos"
-            label="Lejos"
-            disabled={isFormDisabled}
-            onChange={handleChange}
-            value={formData}
-          />
-          <LensTypeSection
-            type="cerca"
-            label="Cerca"
-            disabled={isFormDisabled}
-            onChange={handleChange}
-            value={formData}
-          />
-          <LensTypeSection
-            type="bifocal"
-            label="Bifocal"
-            disabled={isFormDisabled}
-            onChange={handleChange}
-            value={formData}
-          />
-
           {/* Subsección para detalles del armazón */}
-          <div className="col-span-full border-t border-gray-300 dark:border-gray-700 pt-4 mt-4">
-            <h3 className="text-lg font-semibold mb-4">Detalles del Armazón</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={lensDetailsStyles.container}>
+            <h3 className={lensDetailsStyles.title}>Detalles del Armazón</h3>
+            <div className={lensDetailsStyles.grid}>
               <FormField
                 label="Color"
                 type="text"
@@ -336,13 +340,37 @@ const SobrePage = () => {
               />
             </div>
           </div>
+
+          <LensTypeSection
+            type="lejos"
+            label="Lejos"
+            disabled={isFormDisabled}
+            onChange={handleChange}
+            value={formData}
+          />
+          <LensTypeSection
+            type="cerca"
+            label="Cerca"
+            disabled={isFormDisabled}
+            onChange={handleChange}
+            value={formData}
+          />
+          <LensTypeSection
+            type="bifocal"
+            label="Bifocal"
+            disabled={isFormDisabled}
+            onChange={handleChange}
+            value={formData}
+          />
         </FormSection>
 
         {/* --- 3. Otros Campos --- */}
-        <fieldset className={sobrePageStyles.section}>
-          <legend className={sobrePageStyles.sectionTitle}>Otros Campos</legend>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
+        <fieldset className={formSectionStyles.section}>
+          <legend className={formSectionStyles.sectionTitle}>
+            Otros Campos
+          </legend>
+          <div className={otherFieldsStyles.grid}>
+            <div className={otherFieldsStyles.span2}>
               <FormField
                 label="Obra Social"
                 type="text"
@@ -352,7 +380,7 @@ const SobrePage = () => {
                 value={formData.obra_social || ""}
               />
             </div>
-            <div className="md:col-span-2">
+            <div className={otherFieldsStyles.span2}>
               <FormField
                 label="Facturación"
                 type="text"
@@ -362,7 +390,7 @@ const SobrePage = () => {
                 value={formData.facturacion || ""}
               />
             </div>
-            <div className="md:col-span-4">
+            <div className={otherFieldsStyles.span4}>
               <FormField
                 label="Observaciones"
                 type="textarea"
@@ -372,7 +400,7 @@ const SobrePage = () => {
                 value={formData.observaciones || ""}
               />
             </div>
-            <div className="md:col-span-4">
+            <div className={otherFieldsStyles.span4}>
               <FormField
                 label="Receta del Doctor"
                 type="text"
@@ -386,34 +414,41 @@ const SobrePage = () => {
         </fieldset>
 
         {/* --- 4. Detalles del Pago --- */}
-        <FormSection title="Detalles del Pago">
-          <FormField
-            label="Total"
-            type="number"
-            name="total"
-            disabled={isFormDisabled}
-            onChange={handleChange}
-            value={formData.total || ""}
-          />
-          <FormField
-            label="Seña"
-            type="number"
-            name="sena"
-            disabled={isFormDisabled}
-            onChange={handleChange}
-            value={formData.sena || ""}
-          />
-          <FormField
-            label="A Pagar"
-            type="number"
-            name="a_pagar"
-            disabled={true}
-            value={(Number(formData.total) || 0) - (Number(formData.sena) || 0)}
-          />
-        </FormSection>
+        <fieldset className={formSectionStyles.section}>
+          <legend className={formSectionStyles.sectionTitle}>
+            Detalles del Pago
+          </legend>
+          <div className={paymentDetailsStyles.grid}>
+            <FormField
+              label="Total"
+              type="number"
+              name="total"
+              disabled={isFormDisabled}
+              onChange={handleChange}
+              value={formData.total || ""}
+            />
+            <FormField
+              label="Seña"
+              type="number"
+              name="sena"
+              disabled={isFormDisabled}
+              onChange={handleChange}
+              value={formData.sena || ""}
+            />
+            <FormField
+              label="A Pagar"
+              type="number"
+              name="a_pagar"
+              disabled={true}
+              value={
+                (Number(formData.total) || 0) - (Number(formData.sena) || 0)
+              }
+            />
+          </div>
+        </fieldset>
 
         {/* --- 5. Botones --- */}
-        <div className="flex justify-end gap-4 mt-8">
+        <div className={sobrePageStyles.buttonContainer}>
           {action === "ver" ? (
             <Link
               to="/"
