@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockAllSobresResponse } from "@services/_mockData";
 import { addSobre, updateSobre, deleteSobre } from "@services/sobres";
-import { useNotification } from "@components/Notification/useNotification.jsx";
+import { useNotification } from "@components/Notification/useNotification.js";
 // import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
 
 /**
