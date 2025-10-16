@@ -23,28 +23,32 @@ const apiFetch = async (endpoint, options = {}) => {
   if (USE_MOCK_DATA) {
     return new Promise((resolve) => {
       setTimeout(() => {
+        const [path, queryString] = endpoint.split("?");
+        const params = new URLSearchParams(queryString);
         console.log(
-          `[MOCK] Calling endpoint: ${endpoint}`,
-          options.body ? JSON.parse(options.body) : ""
+          `[MOCK] Calling endpoint: ${path}`,
+          Object.fromEntries(params)
         );
-        switch (endpoint) {
+
+        switch (path) {
           case "/getSobre":
             // Simula tanto la búsqueda por DNI como la general (que antes era get_all_sobres)
             {
-              const body = options.body ? JSON.parse(options.body) : {};
+              const dni = params.get("dni");
+              const date_ini = params.get("date_ini");
+              const date_fin = params.get("date_fin");
               let filteredData = mockAllSobresResponse.sobres;
 
-              if (body.dni) {
+              if (dni) {
                 filteredData = filteredData.filter(
-                  (sobre) => sobre.cliente.dni === body.dni
+                  (sobre) => sobre.cliente.dni === Number(dni)
                 );
               }
 
-              if (body.date_ini && body.date_fin) {
+              if (date_ini && date_fin) {
                 filteredData = filteredData.filter(
                   (sobre) =>
-                    sobre.sobre_date >= body.date_ini &&
-                    sobre.sobre_date <= body.date_fin
+                    sobre.sobre_date >= date_ini && sobre.sobre_date <= date_fin
                 );
               }
               resolve({ data: filteredData });
@@ -55,7 +59,7 @@ const apiFetch = async (endpoint, options = {}) => {
           case "/deleteSobre":
           default:
             resolve({
-              message: "Operación simulada exitosa",
+              message: `Operación simulada exitosa para ${path}`,
               detail: `Endpoint ${endpoint} llamado.`,
             });
             break;
@@ -95,9 +99,14 @@ const apiFetch = async (endpoint, options = {}) => {
  * @returns {Promise<{data: import('@services/_mockData').Sobre[]}>} La lista de sobres.
  */
 export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
-  return apiFetch("/getSobre", {
-    method: "POST",
-    body: JSON.stringify({ dni, date_ini, date_fin }),
+  const params = new URLSearchParams();
+  if (dni) params.append("dni", dni);
+  if (date_ini) params.append("date_ini", date_ini);
+  if (date_fin) params.append("date_fin", date_fin);
+
+  const queryString = params.toString();
+  return apiFetch(`/getSobre${queryString ? `?${queryString}` : ""}`, {
+    method: "GET",
   });
 };
 
