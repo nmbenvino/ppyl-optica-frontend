@@ -4,7 +4,7 @@ import {
   toastTypeStyles,
   toastMessageStyle,
   toastCloseButtonStyle,
-} from "./toastStyles.js";
+} from "./Styles.js";
 
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
