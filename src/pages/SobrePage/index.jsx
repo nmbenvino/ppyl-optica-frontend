@@ -504,13 +504,15 @@ const SobrePage = () => {
           gridClassName={generalInfoStyles.grid}
         >
           {/* Fila 1: Toggle Cliente Nuevo */}
-          <div className="md:col-span-4 flex items-center">
-            <ToggleSwitch
-              label="Cliente nuevo"
-              checked={isNewCustomer}
-              onChange={handleNewCustomerToggle}
-            />
-          </div>
+          {action === "crear" && (
+            <div className="md:col-span-4 flex items-center">
+              <ToggleSwitch
+                label="Cliente nuevo"
+                checked={isNewCustomer}
+                onChange={handleNewCustomerToggle}
+              />
+            </div>
+          )}
 
           {/* Fila 2: Fecha y N° Sobre */}
           <div className="md:col-span-2">
@@ -536,35 +538,37 @@ const SobrePage = () => {
           </div>
 
           {/* Fila 3: Campos de Cliente */}
-          {isNewCustomer ? (
-            <FormField
-              label="DNI"
-              type="number"
-              name="dni"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.dni || ""}
-            />
-          ) : (
-            <fieldset
-              className={`${formFieldStyles.fieldSet} ${
-                isFormDisabled ? formFieldStyles.disabled : ""
-              }`}
-            >
-              <legend className={formFieldStyles.legend}>Buscar por DNI</legend>
-              <select
-                name="dni"
-                id="dni"
-                className={formFieldStyles.input}
-                value={formData.dni || ""}
-                onChange={handleChange}
-                disabled={isFormDisabled}
-              >
-                <option value="">Seleccionar cliente...</option>
-                {/* TODO: Cargar dinámicamente desde getClientes() */}
-              </select>
-            </fieldset>
+
+          {!isNewCustomer && (
+            <>
+              {/* <div className="col-span-1"></div> */}
+              <fieldset className={`${formFieldStyles.fieldSet} col-span-2`}>
+                <legend className={formFieldStyles.legend}>
+                  Buscar por DNI
+                </legend>
+                <select
+                  name="dni"
+                  id="dni"
+                  className={formFieldStyles.input}
+                  value={formData.dni || ""}
+                  onChange={handleChange}
+                  disabled={isFormDisabled}
+                >
+                  <option value="">Seleccionar cliente...</option>
+                  {/* TODO: Cargar dinámicamente desde getClientes() */}
+                </select>
+              </fieldset>
+              <div className="col-span-2"></div>
+            </>
           )}
+          <FormField
+            label="DNI"
+            type="number"
+            name="dni"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.dni || ""}
+          />
           <FormField
             label="Cliente"
             type="text"
@@ -589,6 +593,60 @@ const SobrePage = () => {
             onChange={handleChange}
             value={formData.telefono || ""}
           />
+
+          {/* Fila 3: Campos de Cliente */}
+          {/* {!isNewCustomer && (
+            <>
+              <fieldset className={`${formFieldStyles.fieldSet} col-span-2`}>
+                <legend className={formFieldStyles.legend}>
+                  Buscar por DNI
+                </legend>
+                <select
+                  name="dni"
+                  id="dni"
+                  className={formFieldStyles.input}
+                  value={formData.dni || ""}
+                  onChange={handleChange}
+                  disabled={isFormDisabled}
+                >
+                  <option value="">Seleccionar cliente...</option>
+                </select>
+              </fieldset>
+            </>
+          )}
+          <FormField
+            label="DNI"
+            type="number"
+            name="dni"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.dni || ""}
+          />
+          <FormField
+            label="Cliente"
+            type="text"
+            name="cliente"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.cliente || ""}
+          />
+          {!isNewCustomer && <div className="col-span-2"></div>}
+          <FormField
+            label="Domicilio"
+            type="text"
+            name="domicilio"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.domicilio || ""}
+          />
+          <FormField
+            label="Teléfono"
+            type="text"
+            name="telefono"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.telefono || ""}
+          /> */}
         </FormSection>
 
         {/* --- 2. Tipo de Lente --- */}
