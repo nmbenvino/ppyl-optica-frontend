@@ -18,7 +18,7 @@ const MOCK_DELAY = 500; // Simula la latencia de la red
  * @throws {Error} Si la respuesta de la red no es 'ok'.
  */
 const apiFetch = async (endpoint, options = {}) => {
-  // Inicio del mock, despues se va a eliminar junto con USE_MOCK_DATA (linea 6) Y MOCK_DELAY (linea 7)
+  // Inicio del mock, despues se va a eliminar junto con USE_MOCK_DATA (linea 10) Y MOCK_DELAY (linea 11)
   // --- Simulación con mock data ---
   if (USE_MOCK_DATA) {
     return new Promise((resolve) => {
@@ -124,7 +124,7 @@ export const addSobre = (data) => {
  */
 export const deleteSobre = ({ dni, sobre_number }) => {
   return apiFetch("/deleteSobre", {
-    method: "POST", // Se usa POST para poder enviar un cuerpo JSON cómodamente.
+    method: "DELETE",
     body: JSON.stringify({ dni, sobre_number }),
   });
 };
@@ -137,17 +137,7 @@ export const deleteSobre = ({ dni, sobre_number }) => {
  */
 export const updateSobre = (data) => {
   return apiFetch("/update_sobre", {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(data),
   });
-};
-
-/**
- * Busca un usuario para precargar sus datos.
- * Reutiliza `getSobres` para buscar por DNI.
- * @param {number} dni - El DNI del usuario a buscar.
- * @returns {Promise<Object>} Los datos del cliente y sus sobres.
- */
-export const searchUser = (dni) => {
-  return getSobres({ dni });
 };
