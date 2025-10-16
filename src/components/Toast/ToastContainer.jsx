@@ -1,6 +1,6 @@
-import { useNotification } from "../Notification/useNotification.jsx";
+import { useNotification } from "../Notification/useNotification.js";
 import { Toast } from "./Toast.jsx";
-import { toastContainerStyle } from "./toastStyles.js";
+import { toastContainerStyle } from "./Styles.js";
 
 const ToastContainer = () => {
   const { notifications, removeNotification } = useNotification();
