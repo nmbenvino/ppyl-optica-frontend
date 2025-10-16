@@ -20,6 +20,22 @@ export const formFieldStyles = {
 };
 
 /**
+ * Estilos para el componente ToggleSwitch.
+ * @typedef {Object} ToggleSwitchStyles
+ * @property {string} container - Contenedor del toggle.
+ * @property {string} input - Estilos para el input de checkbox oculto.
+ * @property {string} slider - Estilos para el fondo del toggle.
+ * @property {string} text - Estilos para el texto junto al toggle.
+ */
+/** @type {ToggleSwitchStyles} */
+export const toggleSwitchStyles = {
+  container: "relative inline-flex items-center cursor-pointer",
+  input: "sr-only peer",
+  slider:
+    "w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600",
+  text: "ml-3 text-sm font-medium text-gray-900 dark:text-gray-300",
+};
+/**
  * Estilos para el componente FormSection.
  * @typedef {Object} FormSectionStyles
  * @property {string} section - Clases para cada sección del formulario (fieldset).
@@ -63,7 +79,7 @@ export const lensTypeSectionStyles = {
  */
 /** @type {GeneralInfoStyles} */
 export const generalInfoStyles = {
-  grid: "p-6 grid grid-cols-1 md:grid-cols-3 gap-4",
+  grid: "p-6 grid grid-cols-1 md:grid-cols-4 gap-4",
 };
 
 /**
@@ -117,10 +133,10 @@ export const paymentDetailsStyles = {
 /** @type {SobrePageStyles} */
 export const sobrePageStyles = {
   container:
-    "bg-gray-100 min-h-screen text-gray-900 dark:bg-gray-900 dark:text-white p-4 md:p-8 overflow-x-hidden",
-  pageTitle: "text-3xl font-bold mb-6 capitalize",
-  formContainer: "space-y-8",
-  buttonContainer: "flex justify-end gap-4 mt-8",
+    "bg-gray-100 min-h-screen text-gray-900 dark:bg-gray-900 dark:text-white px-4 pb-4 md:px-8 md:pb-8",
+  pageTitle: "text-3xl font-bold capitalize",
+  formContainer: "space-y-8 relative",
+  buttonContainer: "flex justify-end gap-4",
   loadingText: "Cargando datos del sobre...",
   errorText: "text-red-500",
 };

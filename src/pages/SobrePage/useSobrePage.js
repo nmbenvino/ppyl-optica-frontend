@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockAllSobresResponse } from "@services/_mockData";
 import { addSobre, updateSobre, deleteSobre } from "@services/sobres";
+import { useNotification } from "@components/Notification/useNotification.jsx";
 // import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
 
 /**
@@ -32,9 +33,11 @@ export const useSobrePage = (action, id) => {
   const [formData, setFormData] = useState({
     fecha: getLocalDate(new Date()),
   });
+  const [isNewCustomer, setIsNewCustomer] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
 
   const isFormDisabled = action === "ver" || action === "eliminar";
 
@@ -132,6 +135,27 @@ export const useSobrePage = (action, id) => {
   };
 
   /**
+   * Maneja el cambio del toggle "Cliente nuevo".
+   * @param {React.ChangeEvent<HTMLInputElement>} e - El evento de cambio.
+   */
+  const handleNewCustomerToggle = (e) => {
+    const isChecked = e.target.checked;
+    setIsNewCustomer(isChecked);
+
+    // Si se desmarca (cliente existente), limpiar los campos relacionados
+    if (!isChecked) {
+      setFormData((prev) => ({
+        ...prev,
+        dni: "",
+        cliente: "",
+        domicilio: "",
+        telefono: "",
+      }));
+    }
+    // Si se marca, los campos se habilitan para ser llenados manualmente.
+  };
+
+  /**
    * Transforma los datos planos del formulario a la estructura anidada que espera la API.
    * @param {object} data - El estado `formData` del formulario.
    * @returns {object} El payload listo para ser enviado a la API.
@@ -214,22 +238,22 @@ export const useSobrePage = (action, id) => {
       if (action === "crear") {
         const payload = transformFormDataToApiPayload(formData);
         await addSobre(payload);
-        alert("Sobre creado exitosamente");
+        addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
         const payload = transformFormDataToApiPayload(formData);
         await updateSobre(payload);
-        alert("Sobre actualizado exitosamente");
+        addNotification("Sobre actualizado exitosamente", "success");
       } else if (action === "eliminar") {
         await deleteSobre({
           dni: formData.dni,
           sobre_number: formData.numero_sobre,
         });
-        alert("Sobre eliminado exitosamente");
+        addNotification("Sobre eliminado exitosamente", "success");
       }
       navigate("/"); // Redirige a la página principal tras una operación exitosa
     } catch (err) {
       setError(err.message);
-      alert(`Error: ${err.message}`); // Muestra el error al usuario
+      addNotification(`Error: ${err.message}`, "error"); // Muestra el error al usuario
     } finally {
       setLoading(false);
     }
@@ -241,6 +265,8 @@ export const useSobrePage = (action, id) => {
     isFormDisabled,
     formData,
     handleChange,
+    handleNewCustomerToggle,
+    isNewCustomer,
     handleSubmit,
   };
 };
