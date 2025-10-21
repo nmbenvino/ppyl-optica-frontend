@@ -1,69 +1,11 @@
 /**
- * Estilos para el componente FormField.
- * @typedef {Object} FormFieldStyles
- * @property {string} fieldSet - Estilo para el fieldset que envuelve un input.
- * @property {string} legend - Estilo para la leyenda (label) de un campo.
- * @property {string} input - Clases para los campos de entrada.
- * @property {string} textarea - Clases para los campos de área de texto.
- * @property {string} disabled - Clases para el contenedor del campo cuando está deshabilitado.
- */
-/** @type {FormFieldStyles} */
-export const formFieldStyles = {
-  fieldSet: "border border-black dark:border-gray-400 rounded-md px-3 pb-2",
-  legend: "text-sm font-medium px-1 text-gray-600 dark:text-gray-400",
-  input:
-    "bg-transparent w-full focus:outline-none text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-  textarea:
-    "bg-transparent w-full h-24 focus:outline-none text-gray-900 dark:text-white resize-none",
-  disabled:
-    "bg-gray-200 dark:bg-gray-900 bg-[repeating-linear-gradient(45deg,rgba(0,0,0,0.05),rgba(0,0,0,0.05)_10px,transparent_10px,transparent_20px)] dark:bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.09),rgba(255,255,255,0.09)_10px,transparent_10px,transparent_20px)] bg-[length:28px_28px] animate-stripes",
-};
-
-/**
- * Estilos para el componente FormSection.
- * @typedef {Object} FormSectionStyles
- * @property {string} section - Clases para cada sección del formulario (fieldset).
- * @property {string} sectionTitle - Clases para el título de cada sección (legend).
- * @property {string} sectionGrid - Clases para la grilla de campos dentro de una sección.
- */
-/** @type {FormSectionStyles} */
-export const formSectionStyles = {
-  section:
-    "border bg-white dark:bg-gray-800 border-black dark:border-gray-400 rounded-lg",
-  sectionTitle:
-    "text-xl font-semibold px-2 text-blue-600 dark:text-blue-400 ml-4",
-  sectionGrid: "p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4",
-};
-
-/**
- * Estilos para el componente LensTypeSection.
- * @typedef {Object} LensTypeSectionStyles
- * @property {string} container - Contenedor para una sección de tipo de lente (lejos, cerca).
- * @property {string} radioContainer - Contenedor para el input de radio y su label.
- * @property {string} radioInput - Estilos para el input de radio.
- * @property {string} radioLabel - Estilos para el label del radio.
- * @property {string} grid - Grilla para los campos de graduación de un ojo.
- * @property {string} eyeLabel - Etiqueta para "Ojo Derecho" / "Ojo Izquierdo".
- */
-/** @type {LensTypeSectionStyles} */
-export const lensTypeSectionStyles = {
-  container:
-    "col-span-full border-t border-gray-800 dark:border-gray-500 pt-4 mt-4 first:border-t-0 first:mt-0 first:pt-0",
-  radioContainer: "flex items-center gap-2 mb-4",
-  radioInput: "h-5 w-5 rounded",
-  radioLabel: "text-lg font-semibold",
-  grid: "grid grid-cols-1 md:grid-cols-7 gap-4 items-center",
-  eyeLabel: "font-bold text-lg self-center text-right pr-2",
-};
-
-/**
  * Estilos para la sección de Información General.
  * @typedef {Object} GeneralInfoStyles
  * @property {string} grid - Grilla para los campos de información general.
  */
 /** @type {GeneralInfoStyles} */
 export const generalInfoStyles = {
-  grid: "p-6 grid grid-cols-1 md:grid-cols-3 gap-4",
+  grid: "p-6 grid grid-cols-1 md:grid-cols-4 gap-4",
 };
 
 /**
@@ -72,12 +14,20 @@ export const generalInfoStyles = {
  * @property {string} container - Contenedor para la sub-sección.
  * @property {string} title - Título de la sub-sección.
  * @property {string} grid - Grilla para los campos de detalles del armazón.
+ * @property {string} newCustomerToggleContainer - Contenedor para el toggle de cliente nuevo.
+ * @property {string} dateFieldContainer - Contenedor para el campo de fecha.
+ * @property {string} sobreNumberFieldContainer - Contenedor para el campo de número de sobre.
+ * @property {string} dniSearchFieldContainer - Contenedor para el campo de búsqueda por DNI.
  */
 /** @type {LensDetailsStyles} */
 export const lensDetailsStyles = {
   container: "col-span-full",
   title: "text-lg font-semibold mb-4",
   grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4",
+  newCustomerToggleContainer: "md:col-span-4 flex items-center",
+  dateFieldContainer: "md:col-span-2",
+  sobreNumberFieldContainer: "md:col-span-2",
+  dniSearchFieldContainer: "col-span-2",
 };
 
 /**
@@ -113,14 +63,19 @@ export const paymentDetailsStyles = {
  * @property {string} buttonContainer - Contenedor para los botones de acción del formulario.
  * @property {string} loadingText - Estilo para el texto de carga.
  * @property {string} errorText - Estilo para el texto de error.
+ * @property {string} headerContainer - Contenedor para el encabezado fijo de la página.
+ * @property {string} headerTitle - Estilo para el título dentro del encabezado.
  */
 /** @type {SobrePageStyles} */
 export const sobrePageStyles = {
   container:
-    "bg-gray-100 min-h-screen text-gray-900 dark:bg-gray-900 dark:text-white p-4 md:p-8 overflow-x-hidden",
-  pageTitle: "text-3xl font-bold mb-6 capitalize",
-  formContainer: "space-y-8",
-  buttonContainer: "flex justify-end gap-4 mt-8",
+    "bg-gray-100 min-h-screen text-gray-900 dark:bg-gray-900 dark:text-white px-4 pb-4 md:px-8 md:pb-8",
+  pageTitle: "text-3xl font-bold capitalize",
+  formContainer: "space-y-8 relative",
+  buttonContainer: "flex justify-end gap-4",
   loadingText: "Cargando datos del sobre...",
   errorText: "text-red-500",
+  headerContainer:
+    "flex justify-between items-center sticky top-0 z-10 bg-gray-100 dark:bg-gray-900 py-4 mb-6 -mx-4 md:-mx-8 px-4 md:px-8 border-b",
+  headerTitle: "mb-0",
 };

@@ -1,171 +1,17 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSobrePage } from "./useSobrePage";
 import {
   sobrePageStyles,
-  formFieldStyles,
-  formSectionStyles,
-  lensTypeSectionStyles,
   generalInfoStyles,
   lensDetailsStyles,
   otherFieldsStyles,
   paymentDetailsStyles,
 } from "./Styles";
-import { homePageStyles } from "@pages/HomePage/Styles"; // Reutilizamos estilos de botones
-
-/**
- * Componente para un campo de formulario genérico con una etiqueta flotante.
- * Utiliza un fieldset y legend para un estilo y semántica mejorados.
- * @param {object} props - Propiedades del componente.
- * @param {string} props.label - El texto de la etiqueta para el campo.
- * @param {string} [props.type='text'] - El tipo de input (e.g., 'text', 'number', 'date').
- * @param {string} props.name - El nombre del campo, usado para el estado del formulario.
- * @param {boolean} props.disabled - Si el campo está deshabilitado.
- * @returns {JSX.Element}
- */
-const FormField = ({ label, type = "text", name, disabled, ...props }) => (
-  <fieldset
-    className={`${formFieldStyles.fieldSet} ${
-      disabled ? formFieldStyles.disabled : ""
-    }`}
-  >
-    <legend className={formFieldStyles.legend}>{label}</legend>
-    {type === "textarea" ? (
-      <textarea
-        id={name}
-        name={name}
-        className={formFieldStyles.textarea}
-        disabled={disabled}
-        {...props}
-      />
-    ) : (
-      <input
-        id={name}
-        name={name}
-        type={type}
-        className={formFieldStyles.input}
-        step={type === "number" ? "any" : undefined}
-        disabled={disabled}
-        {...props}
-      />
-    )}
-  </fieldset>
-);
-
-/**
- * Componente que renderiza una sección principal del formulario con un título.
- * @param {object} props - Propiedades del componente.
- * @param {string} props.title - El título de la sección.
- * @param {React.ReactNode} props.children - Los campos o contenido de la sección.
- * @returns {JSX.Element}
- */
-const FormSection = ({ title, children }) => (
-  <fieldset className={formSectionStyles.section}>
-    <legend className={formSectionStyles.sectionTitle}>{title}</legend>
-    <div className={formSectionStyles.sectionGrid}>{children}</div>
-  </fieldset>
-);
-
-/**
- * Componente específico para una opción de tipo de lente (Lejos, Cerca, Bifocal).
- * Incluye el radio button y los campos de graduación para ambos ojos.
- * @param {object} props - Propiedades del componente.
- * @param {'lejos' | 'cerca' | 'bifocal'} props.type - El tipo de lente que representa esta sección.
- * @param {string} props.label - La etiqueta para el radio button (e.g., "Lejos").
- * @param {boolean} props.disabled - Si los campos están deshabilitados.
- * @param {Function} props.onChange - El manejador de cambios para los inputs.
- * @param {object} props.value - El objeto de estado del formulario (`formData`).
- * @returns {JSX.Element}
- */
-const LensTypeSection = ({ type, label, disabled, onChange, value }) => (
-  <div className={lensTypeSectionStyles.container} key={type}>
-    <div className={lensTypeSectionStyles.radioContainer}>
-      <input
-        type="radio"
-        id={`check_${type}`}
-        name="tipo_lente" // Nombre común para agrupar los radio buttons
-        value={type} // El valor de este radio button es su tipo (e.g., "lejos")
-        disabled={disabled}
-        onChange={onChange}
-        checked={value.tipo_lente === type} // Se marca si el valor en formData coincide
-        className={lensTypeSectionStyles.radioInput}
-      />
-      <label
-        htmlFor={`check_${type}`}
-        className={lensTypeSectionStyles.radioLabel}
-      >
-        {label}
-      </label>
-    </div>
-    {/* OD */}
-    <div className={lensTypeSectionStyles.grid}>
-      <span className={lensTypeSectionStyles.eyeLabel}>Ojo Derecho</span>
-      <div className="md:col-span-2">
-        <FormField
-          label="Esf"
-          type="number"
-          name={`${type}_od_esf`}
-          onChange={onChange}
-          value={value.tipo_lente === type ? value[`${type}_od_esf`] || "" : ""}
-          disabled={disabled || value.tipo_lente !== type}
-        />
-      </div>
-      <div className="md:col-span-2">
-        <FormField
-          label="Cil"
-          type="number"
-          name={`${type}_od_cil`}
-          onChange={onChange}
-          value={value.tipo_lente === type ? value[`${type}_od_cil`] || "" : ""}
-          disabled={disabled || value.tipo_lente !== type}
-        />
-      </div>
-      <div className="md:col-span-2">
-        <FormField
-          label="Eje"
-          type="number"
-          name={`${type}_od_eje`}
-          onChange={onChange}
-          value={value.tipo_lente === type ? value[`${type}_od_eje`] || "" : ""}
-          disabled={disabled || value.tipo_lente !== type}
-        />
-      </div>
-    </div>
-    {/* OI */}
-    <div className={`${lensTypeSectionStyles.grid} mt-2`}>
-      <span className={lensTypeSectionStyles.eyeLabel}>Ojo Izquierdo</span>
-      <div className="md:col-span-2">
-        <FormField
-          label="Esf"
-          type="number"
-          name={`${type}_oi_esf`}
-          onChange={onChange}
-          value={value.tipo_lente === type ? value[`${type}_oi_esf`] || "" : ""}
-          disabled={disabled || value.tipo_lente !== type}
-        />
-      </div>
-      <div className="md:col-span-2">
-        <FormField
-          label="Cil"
-          type="number"
-          name={`${type}_oi_cil`}
-          onChange={onChange}
-          value={value.tipo_lente === type ? value[`${type}_oi_cil`] || "" : ""}
-          disabled={disabled || value.tipo_lente !== type}
-        />
-      </div>
-      <div className="md:col-span-2">
-        <FormField
-          label="Eje"
-          type="number"
-          name={`${type}_oi_eje`}
-          onChange={onChange}
-          value={value.tipo_lente === type ? value[`${type}_oi_eje`] || "" : ""}
-          disabled={disabled || value.tipo_lente !== type}
-        />
-      </div>
-    </div>
-  </div>
-);
+import FormField from "@components/FormField";
+import FormSection from "@components/FormSection";
+import ToggleSwitch from "@components/ToggleSwitch";
+import Button from "@components/Button";
+import LensTypeSection from "./localComponents/LensTypeSection";
 
 /**
  * Página para crear, ver, editar o eliminar un Sobre.
@@ -180,6 +26,8 @@ const SobrePage = () => {
     isFormDisabled,
     formData,
     handleChange,
+    handleNewCustomerToggle,
+    isNewCustomer,
     handleSubmit,
   } = useSobrePage(action, id);
 
@@ -201,14 +49,10 @@ const SobrePage = () => {
   };
 
   /**
-   * Determina la clase de estilo del botón de envío según la acción actual.
-   * @returns {string} La clase de Tailwind para el botón.
+   * Determina la variante de estilo del botón de envío según la acción actual.
+   * @returns {'primary' | 'danger'} La variante del botón.
    */
-  const getButtonClass = () => {
-    return action === "eliminar"
-      ? homePageStyles.button.danger
-      : homePageStyles.button.primary;
-  };
+  const getButtonVariant = () => (action === "eliminar" ? "danger" : "primary");
 
   // Helper para obtener la fecha local en formato YYYY-MM-DD
   const getLocalDate = (date) => {
@@ -237,17 +81,60 @@ const SobrePage = () => {
 
   return (
     <div className={sobrePageStyles.container}>
-      <h1 className={sobrePageStyles.pageTitle}>
-        {action} Sobre {id && `#${formData.numero_sobre || id}`}
-      </h1>
+      {/* --- Header Fijo --- */}
+      <div className={sobrePageStyles.headerContainer}>
+        <h1
+          className={`${sobrePageStyles.pageTitle} ${sobrePageStyles.headerTitle}`}
+        >
+          {action} Sobre {id && `#${formData.numero_sobre || id}`}
+        </h1>
 
-      <form className={sobrePageStyles.formContainer} onSubmit={handleSubmit}>
+        {/* --- Botones --- */}
+        <div className={sobrePageStyles.buttonContainer}>
+          {action === "ver" ? (
+            <Button as="link" to="/" variant="secondary">
+              Volver
+            </Button>
+          ) : (
+            <>
+              <Button as="link" to="/" variant="secondary">
+                Volver
+              </Button>
+              <Button
+                type="submit"
+                form="sobre-form" // Asocia el botón con el formulario
+                variant={getButtonVariant()}
+              >
+                {getButtonLabel()}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <form
+        id="sobre-form" // ID para asociar con el botón de submit
+        className={sobrePageStyles.formContainer}
+        onSubmit={handleSubmit}
+      >
         {/* --- 1. Información General --- */}
-        <fieldset className={formSectionStyles.section}>
-          <legend className={formSectionStyles.sectionTitle}>
-            Información General
-          </legend>
-          <div className={generalInfoStyles.grid}>
+        <FormSection
+          title="Información General"
+          gridClassName={generalInfoStyles.grid}
+        >
+          {/* Fila 1: Toggle Cliente Nuevo */}
+          {action === "crear" && (
+            <div className={generalInfoStyles.newCustomerToggleContainer}>
+              <ToggleSwitch
+                label="Cliente nuevo"
+                checked={isNewCustomer}
+                onChange={handleNewCustomerToggle}
+              />
+            </div>
+          )}
+
+          {/* Fila 2: Fecha y N° Sobre */}
+          <div className={generalInfoStyles.dateFieldContainer}>
             <FormField
               label="Fecha"
               type="date"
@@ -257,52 +144,72 @@ const SobrePage = () => {
               value={formData.fecha || ""}
               max={today}
             />
+          </div>
+          <div className={generalInfoStyles.sobreNumberFieldContainer}>
             <FormField
               label="N° Sobre"
               type="number"
               name="numero_sobre"
-              disabled={isFormDisabled}
+              disabled={true}
               onChange={handleChange}
               value={formData.numero_sobre || ""}
             />
-            <FormField
-              label="Cliente"
-              type="text"
-              name="cliente"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.cliente || ""}
-            />
-            <FormField
-              label="Domicilio"
-              type="text"
-              name="domicilio"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.domicilio || ""}
-            />
-            <FormField
-              label="DNI/CUIT"
-              type="number"
-              name="dni"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.dni || ""}
-            />
-            <FormField
-              label="Teléfono"
-              type="text"
-              name="telefono"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.telefono || ""}
-            />
           </div>
-        </fieldset>
+
+          {/* Fila 3: Campos de Cliente */}
+          {!isNewCustomer && (
+            <>
+              <div className={generalInfoStyles.dniSearchFieldContainer}>
+                <FormField
+                  label="Buscar por DNI"
+                  type="select"
+                  name="dni"
+                  value={formData.dni || ""}
+                  onChange={handleChange}
+                  disabled={isFormDisabled}
+                  options={[{ value: "", label: "Seleccionar cliente..." }]} // TODO: Cargar dinámicamente
+                />
+              </div>
+              <div className={generalInfoStyles.dniSearchFieldContainer}></div>{" "}
+              {/* Empty div for layout */}
+            </>
+          )}
+          <FormField
+            label="DNI"
+            type="number"
+            name="dni"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.dni || ""}
+          />
+          <FormField
+            label="Cliente"
+            type="text"
+            name="cliente"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.cliente || ""}
+          />
+          <FormField
+            label="Domicilio"
+            type="text"
+            name="domicilio"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.domicilio || ""}
+          />
+          <FormField
+            label="Teléfono"
+            type="text"
+            name="telefono"
+            disabled={isFormDisabled || !isNewCustomer}
+            onChange={handleChange}
+            value={formData.telefono || ""}
+          />
+        </FormSection>
 
         {/* --- 2. Tipo de Lente --- */}
         <FormSection title="Tipo de Lente">
-          {/* Subsección para detalles del armazón */}
           <div className={lensDetailsStyles.container}>
             <h3 className={lensDetailsStyles.title}>Detalles del Armazón</h3>
             <div className={lensDetailsStyles.grid}>
@@ -365,114 +272,81 @@ const SobrePage = () => {
         </FormSection>
 
         {/* --- 3. Otros Campos --- */}
-        <fieldset className={formSectionStyles.section}>
-          <legend className={formSectionStyles.sectionTitle}>
-            Otros Campos
-          </legend>
-          <div className={otherFieldsStyles.grid}>
-            <div className={otherFieldsStyles.span2}>
-              <FormField
-                label="Obra Social"
-                type="text"
-                name="obra_social"
-                disabled={isFormDisabled}
-                onChange={handleChange}
-                value={formData.obra_social || ""}
-              />
-            </div>
-            <div className={otherFieldsStyles.span2}>
-              <FormField
-                label="Facturación"
-                type="text"
-                name="facturacion"
-                disabled={isFormDisabled}
-                onChange={handleChange}
-                value={formData.facturacion || ""}
-              />
-            </div>
-            <div className={otherFieldsStyles.span4}>
-              <FormField
-                label="Observaciones"
-                type="textarea"
-                name="observaciones"
-                disabled={isFormDisabled}
-                onChange={handleChange}
-                value={formData.observaciones || ""}
-              />
-            </div>
-            <div className={otherFieldsStyles.span4}>
-              <FormField
-                label="Receta del Doctor"
-                type="text"
-                name="receta_doctor"
-                disabled={isFormDisabled}
-                onChange={handleChange}
-                value={formData.receta_doctor || ""}
-              />
-            </div>
+        <FormSection
+          title="Otros Campos"
+          gridClassName={otherFieldsStyles.grid}
+        >
+          <div className={otherFieldsStyles.span2}>
+            <FormField
+              label="Obra Social"
+              type="text"
+              name="obra_social"
+              disabled={isFormDisabled}
+              onChange={handleChange}
+              value={formData.obra_social || ""}
+            />
           </div>
-        </fieldset>
+          <div className={otherFieldsStyles.span2}>
+            <FormField
+              label="Facturación"
+              type="text"
+              name="facturacion"
+              disabled={isFormDisabled}
+              onChange={handleChange}
+              value={formData.facturacion || ""}
+            />
+          </div>
+          <div className={otherFieldsStyles.span4}>
+            <FormField
+              label="Observaciones"
+              type="textarea"
+              name="observaciones"
+              disabled={isFormDisabled}
+              onChange={handleChange}
+              value={formData.observaciones || ""}
+            />
+          </div>
+          <div className={otherFieldsStyles.span4}>
+            <FormField
+              label="Receta del Doctor"
+              type="text"
+              name="receta_doctor"
+              disabled={isFormDisabled}
+              onChange={handleChange}
+              value={formData.receta_doctor || ""}
+            />
+          </div>
+        </FormSection>
 
         {/* --- 4. Detalles del Pago --- */}
-        <fieldset className={formSectionStyles.section}>
-          <legend className={formSectionStyles.sectionTitle}>
-            Detalles del Pago
-          </legend>
-          <div className={paymentDetailsStyles.grid}>
-            <FormField
-              label="Total"
-              type="number"
-              name="total"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.total || ""}
-            />
-            <FormField
-              label="Seña"
-              type="number"
-              name="sena"
-              disabled={isFormDisabled}
-              onChange={handleChange}
-              value={formData.sena || ""}
-            />
-            <FormField
-              label="A Pagar"
-              type="number"
-              name="a_pagar"
-              disabled={true}
-              value={
-                (Number(formData.total) || 0) - (Number(formData.sena) || 0)
-              }
-            />
-          </div>
-        </fieldset>
-
-        {/* --- 5. Botones --- */}
-        <div className={sobrePageStyles.buttonContainer}>
-          {action === "ver" ? (
-            <Link
-              to="/"
-              className={`${homePageStyles.button.base} ${homePageStyles.button.secondary}`}
-            >
-              Volver
-            </Link>
-          ) : (
-            <>
-              <Link
-                to="/"
-                className={`${homePageStyles.button.base} ${homePageStyles.button.secondary}`}
-              >
-                Volver
-              </Link>
-              <button
-                type="submit"
-                className={`${homePageStyles.button.base} ${getButtonClass()}`}
-              >
-                {getButtonLabel()}
-              </button>
-            </>
-          )}
-        </div>
+        <FormSection
+          title="Detalles del Pago"
+          gridClassName={paymentDetailsStyles.grid}
+        >
+          <FormField
+            label="Total"
+            type="number"
+            name="total"
+            disabled={isFormDisabled}
+            onChange={handleChange}
+            value={formData.total || ""}
+          />
+          <FormField
+            label="Seña"
+            type="number"
+            name="sena"
+            disabled={isFormDisabled}
+            onChange={handleChange}
+            value={formData.sena || ""}
+          />
+          <FormField
+            label="A Pagar"
+            type="number"
+            name="a_pagar"
+            disabled={true}
+            value={(Number(formData.total) || 0) - (Number(formData.sena) || 0)}
+          />
+        </FormSection>
       </form>
     </div>
   );

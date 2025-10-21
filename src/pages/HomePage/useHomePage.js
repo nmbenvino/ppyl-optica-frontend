@@ -81,13 +81,13 @@ export const useHomePage = () => {
    * @param {React.ChangeEvent<HTMLInputElement>} e - El evento del input.
    */
   const handleFilterChange = (e) => {
-    const { id, value } = e.target;
+    const { name, value } = e.target;
     // Limita el input de DNI a 8 caracteres
-    if (id === "dni" && value.length > 8) {
+    if (name === "dni" && value.length > 8) {
       return;
     }
 
-    setFilters((prev) => ({ ...prev, [id]: value }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   /**

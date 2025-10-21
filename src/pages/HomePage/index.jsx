@@ -1,79 +1,8 @@
+import SobresTable from "./localComponents/SobresTable";
 import { useHomePage } from "./useHomePage.js";
 import { homePageStyles } from "./Styles.js";
-import { Link } from "react-router-dom";
-
-/**
- * Componente que renderiza la tabla de sobres.
- * @param {object} props - Propiedades del componente.
- * @param {boolean} props.loading - Indica si los datos se están cargando.
- * @param {Array} props.sobres - El array de sobres a mostrar.
- * @param {object} props.selectedSobre - El sobre actualmente seleccionado.
- * @param {Function} props.handleSelectSobre - Función para manejar la selección de un sobre.
- * @param {Function} props.formatDateToDDMMYYYY - Función para formatear la fecha.
- * @returns {JSX.Element}
- */
-const SobresTable = ({
-  loading,
-  sobres,
-  selectedSobre,
-  handleSelectSobre,
-  formatDateToDDMMYYYY,
-}) => (
-  <div className={homePageStyles.tableContainer}>
-    <table className={homePageStyles.table}>
-      <thead className={homePageStyles.tableHead}>
-        <tr>
-          <th className={`${homePageStyles.tableHeader} w-12`}></th>
-          <th className={homePageStyles.tableHeader}>Cliente</th>
-          <th className={homePageStyles.tableHeader}>N° Sobre</th>
-          <th className={homePageStyles.tableHeader}>Fecha Creación</th>
-        </tr>
-      </thead>
-      <tbody>
-        {loading ? (
-          <tr>
-            <td colSpan="4" className={homePageStyles.tableMessage}>
-              Cargando...
-            </td>
-          </tr>
-        ) : sobres.length === 0 ? (
-          <tr>
-            <td colSpan="4" className={homePageStyles.tableMessage}>
-              No se encontraron sobres con los filtros aplicados.
-            </td>
-          </tr>
-        ) : (
-          sobres.map((sobre) => (
-            <tr
-              key={sobre.id_sobre}
-              className={homePageStyles.tableRow}
-              onClick={() =>
-                handleSelectSobre(sobre.id_sobre, sobre.sobre_number)
-              }
-            >
-              <td className={homePageStyles.tableCell}>
-                <input
-                  type="radio"
-                  name="selectedSobre"
-                  checked={selectedSobre.id === sobre.id_sobre}
-                  readOnly
-                  className={homePageStyles.radioInput}
-                />
-              </td>
-              <td
-                className={homePageStyles.tableCell}
-              >{`${sobre.cliente.customer_name} ${sobre.cliente.last_name}`}</td>
-              <td className={homePageStyles.tableCell}>{sobre.sobre_number}</td>
-              <td className={homePageStyles.tableCell}>
-                {formatDateToDDMMYYYY(sobre.sobre_date)}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-);
+import FormField from "@components/FormField/index.jsx";
+import Button from "@components/Button/index.jsx";
 
 /**
  * Componente que representa la página de inicio de la aplicación.
@@ -98,7 +27,6 @@ const HomePage = () => {
   }
 
   const isActionDisabled = !selectedSobre.id;
-  // Helper para obtener la fecha local en formato YYYY-MM-DD
   const getLocalDate = (date) => {
     const offset = date.getTimezoneOffset();
     const localDate = new Date(date.getTime() - offset * 60 * 1000);
@@ -123,95 +51,68 @@ const HomePage = () => {
       <div className={homePageStyles.header}>
         <h1 className={homePageStyles.title}>Gestión de Sobres</h1>
         <div className={homePageStyles.actionsContainer}>
-          <Link
-            to="/sobres/crear"
-            className={`${homePageStyles.button.base} ${homePageStyles.button.primary}`}
-          >
+          <Button as="link" to="/sobres/crear" variant="primary">
             Crear Sobre
-          </Link>
-          <Link
-            to={isActionDisabled ? "#" : `/sobres/editar/${selectedSobre.id}`}
-            className={
-              isActionDisabled
-                ? `${homePageStyles.button.base} ${homePageStyles.button.disabled}`
-                : `${homePageStyles.button.base} ${homePageStyles.button.secondary}`
-            }
-            onClick={(e) => isActionDisabled && e.preventDefault()}
+          </Button>
+          <Button
+            as="link"
+            to={`/sobres/editar/${selectedSobre.id}`}
+            variant="secondary"
+            disabled={isActionDisabled}
           >
             Editar
-          </Link>
-          <Link
-            to={isActionDisabled ? "#" : `/sobres/ver/${selectedSobre.id}`}
-            className={
-              isActionDisabled
-                ? `${homePageStyles.button.base} ${homePageStyles.button.disabled}`
-                : `${homePageStyles.button.base} ${homePageStyles.button.secondary}`
-            }
-            onClick={(e) => isActionDisabled && e.preventDefault()}
+          </Button>
+          <Button
+            as="link"
+            to={`/sobres/ver/${selectedSobre.id}`}
+            variant="secondary"
+            disabled={isActionDisabled}
           >
             Ver
-          </Link>
-          <Link
-            to={isActionDisabled ? "#" : `/sobres/eliminar/${selectedSobre.id}`}
-            className={
-              isActionDisabled
-                ? `${homePageStyles.button.base} ${homePageStyles.button.disabled}`
-                : `${homePageStyles.button.base} ${homePageStyles.button.danger}`
-            }
-            onClick={(e) => isActionDisabled && e.preventDefault()}
+          </Button>
+          <Button
+            as="link"
+            to={`/sobres/eliminar/${selectedSobre.id}`}
+            variant="danger"
+            disabled={isActionDisabled}
           >
             Eliminar
-          </Link>
+          </Button>
         </div>
       </div>
 
       {/* --- 2. Sección de Filtros --- */}
       <div className={homePageStyles.filtersContainer}>
-        <div className={homePageStyles.filterGroup}>
-          <label htmlFor="customerDni" className={homePageStyles.filterLabel}>
-            DNI del Cliente
-          </label>
-          <input
-            type="number"
-            id="dni"
-            className={homePageStyles.input}
-            placeholder="Buscar por DNI..."
-            value={filters.dni}
-            onChange={handleFilterChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="dateFrom" className={homePageStyles.filterLabel}>
-            Fecha Desde
-          </label>
-          <input
-            type="date"
-            id="date_ini"
-            className={homePageStyles.input}
-            value={filters.date_ini}
-            onChange={handleFilterChange}
-            max={today}
-          />
-        </div>
-        <div>
-          <label htmlFor="dateTo" className={homePageStyles.filterLabel}>
-            Fecha Hasta
-          </label>
-          <input
-            type="date"
-            id="date_fin"
-            className={homePageStyles.input}
-            value={filters.date_fin}
-            onChange={handleFilterChange}
-            max={today}
-          />
-        </div>
-        <button
-          className={`${homePageStyles.button.base} ${homePageStyles.button.primary}`}
-          onClick={handleSearch}
-        >
+        <FormField
+          label="DNI del Cliente"
+          type="number"
+          name="dni"
+          placeholder="Buscar por DNI..."
+          value={filters.dni}
+          onChange={handleFilterChange}
+          containerClassName={homePageStyles.filterGroup}
+        />
+        <FormField
+          label="Fecha Desde"
+          type="date"
+          name="date_ini"
+          value={filters.date_ini}
+          onChange={handleFilterChange}
+          max={today}
+          containerClassName={homePageStyles.filterGroup}
+        />
+        <FormField
+          label="Fecha Hasta"
+          type="date"
+          name="date_fin"
+          value={filters.date_fin}
+          onChange={handleFilterChange}
+          max={today}
+          containerClassName={homePageStyles.filterGroup}
+        />
+        <Button onClick={handleSearch} variant="primary">
           Buscar
-        </button>
+        </Button>
       </div>
 
       {/* --- 3. Sección de Tabla --- */}
