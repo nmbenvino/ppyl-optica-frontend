@@ -119,14 +119,12 @@ export const getNumeroSobre = () => {
 };
 
 /**
- * Obtiene los datos de un cliente por su DNI.
- * Corresponde al endpoint `/customers/{dni}`.
- * @param {Object} params - Los parámetros para la búsqueda.
- * @param {number} params.dni - El DNI del cliente a buscar.
- * @returns {Promise<Customer>} Los datos del cliente.
+ * Obtiene una lista de todos los clientes.
+ * Corresponde al endpoint `/customers`.
+ * @returns {Promise<Customer[]>} Una lista de todos los clientes.
  */
-export const getCustomer = ({ dni }) => {
-  return apiFetch(`/customers/${dni}`, {
+export const getCustomers = () => {
+  return apiFetch(`/customers`, {
     method: "GET",
   });
 };
