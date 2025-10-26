@@ -92,7 +92,7 @@ export const mockFilteredCustomerResponse = {
           },
           {
             id_lens: 1002,
-            type: "cerca",
+            type: "lejos",
             lens: "oi",
             esf: -1.0,
             cil: -0.25,
@@ -161,6 +161,31 @@ export const mockAllSobresResponse = {
   ],
 };
 
+/**
+ * Simula la respuesta para el endpoint `/customers`.
+ * @type {{customers: Customer[]}}
+ */
+export const mockAllCustomersResponse = {
+  customers: [
+    {
+      id_customer: 123,
+      customer_name: "Juan",
+      last_name: "Pérez",
+      dni: 12345678,
+      address: "Calle Falsa 123",
+      phone: "1234-5678",
+    },
+    {
+      id_customer: 124,
+      customer_name: "Maria",
+      last_name: "Gomez",
+      dni: 23456789,
+      address: "Av. Siempre Viva 123",
+      phone: "5555-4321",
+    },
+  ],
+};
+
 const MOCK_DELAY = 500; // Simula la latencia de la red
 
 /**
@@ -180,6 +205,12 @@ export const handleMockRequest = (endpoint) => {
       );
 
       switch (path) {
+        case "/getNumeroSobre":
+          // Simula la obtención del siguiente número de sobre.
+          // En un caso real, esto sería dinámico.
+          // Si no hay sobres, el backend devuelve 1.
+          resolve(mockAllSobresResponse.sobres.length + 1);
+          break;
         case "/getSobre":
           // Simula tanto la búsqueda por DNI como la general (que antes era get_all_sobres)
           {
@@ -203,14 +234,30 @@ export const handleMockRequest = (endpoint) => {
             resolve({ data: filteredData });
           }
           break;
+        case "/customers":
+          resolve(mockAllCustomersResponse.customers);
+          break;
+        case (path.match(/^\/customers\/\d+$/) || {}).input: {
+          const dni = Number(path.split("/")[2]);
+          const customer = mockAllCustomersResponse.customers.find(
+            (c) => c.dni === dni
+          );
+          if (customer) {
+            resolve(customer);
+          } else {
+            // En un caso real, esto sería un reject, pero para el mock resolvemos con null o un objeto de error.
+            resolve(null);
+          }
+          break;
+        }
         case "/add_sobre":
+          resolve({ message: "agregado exitosamente" });
+          break;
         case "/update_sobre":
+          resolve({ message: "actualizacion exitosa" });
+          break;
         case "/deleteSobre":
-        default:
-          resolve({
-            message: `Operación simulada exitosa para ${path}`,
-            detail: `Endpoint ${endpoint} llamado.`,
-          });
+          resolve({ detail: "Sobre eliminado correctamente" });
           break;
       }
     }, MOCK_DELAY);
