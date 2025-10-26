@@ -2,10 +2,18 @@
  * Estilos para la sección de Información General.
  * @typedef {Object} GeneralInfoStyles
  * @property {string} grid - Grilla para los campos de información general.
+ * @property {string} newCustomerToggleContainer - Contenedor para el toggle de cliente nuevo.
+ * @property {string} dateFieldContainer - Contenedor para el campo de fecha.
+ * @property {string} sobreNumberFieldContainer - Contenedor para el campo de número de sobre.
+ * @property {string} dniSearchFieldContainer - Contenedor para el campo de búsqueda por DNI.
  */
 /** @type {GeneralInfoStyles} */
 export const generalInfoStyles = {
   grid: "p-6 grid grid-cols-1 md:grid-cols-4 gap-4",
+  newCustomerToggleContainer: "md:col-span-4 flex items-center",
+  dateFieldContainer: "md:col-span-2",
+  sobreNumberFieldContainer: "md:col-span-2",
+  dniSearchFieldContainer: "col-span-2",
 };
 
 /**
@@ -14,20 +22,12 @@ export const generalInfoStyles = {
  * @property {string} container - Contenedor para la sub-sección.
  * @property {string} title - Título de la sub-sección.
  * @property {string} grid - Grilla para los campos de detalles del armazón.
- * @property {string} newCustomerToggleContainer - Contenedor para el toggle de cliente nuevo.
- * @property {string} dateFieldContainer - Contenedor para el campo de fecha.
- * @property {string} sobreNumberFieldContainer - Contenedor para el campo de número de sobre.
- * @property {string} dniSearchFieldContainer - Contenedor para el campo de búsqueda por DNI.
  */
 /** @type {LensDetailsStyles} */
 export const lensDetailsStyles = {
   container: "col-span-full",
   title: "text-lg font-semibold mb-4",
   grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4",
-  newCustomerToggleContainer: "md:col-span-4 flex items-center",
-  dateFieldContainer: "md:col-span-2",
-  sobreNumberFieldContainer: "md:col-span-2",
-  dniSearchFieldContainer: "col-span-2",
 };
 
 /**
