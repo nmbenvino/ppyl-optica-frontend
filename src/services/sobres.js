@@ -1,14 +1,10 @@
 /**
  * Este archivo contiene todos los servicios para interactuar con la API de sobres.
  */
-import {
-  mockAllSobresResponse,
-  mockFilteredCustomerResponse,
-} from "@services/_mockData.js";
+import { handleMockRequest } from "@services/_mockData.js";
 
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "http://localhost:8000";
 const USE_MOCK_DATA = true; // Cambiar a false para usar la API real
-const MOCK_DELAY = 500; // Simula la latencia de la red
 
 /**
  * Realiza una petición fetch y maneja la respuesta y los errores.
@@ -18,54 +14,9 @@ const MOCK_DELAY = 500; // Simula la latencia de la red
  * @throws {Error} Si la respuesta de la red no es 'ok'.
  */
 const apiFetch = async (endpoint, options = {}) => {
-  // Inicio del mock, despues se va a eliminar junto con USE_MOCK_DATA (linea 10) Y MOCK_DELAY (linea 11)
   // --- Simulación con mock data ---
   if (USE_MOCK_DATA) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const [path, queryString] = endpoint.split("?");
-        const params = new URLSearchParams(queryString);
-        console.log(
-          `[MOCK] Calling endpoint: ${path}`,
-          Object.fromEntries(params)
-        );
-
-        switch (path) {
-          case "/getSobre":
-            // Simula tanto la búsqueda por DNI como la general (que antes era get_all_sobres)
-            {
-              const dni = params.get("dni");
-              const date_ini = params.get("date_ini");
-              const date_fin = params.get("date_fin");
-              let filteredData = mockAllSobresResponse.sobres;
-
-              if (dni) {
-                filteredData = filteredData.filter(
-                  (sobre) => sobre.cliente.dni === Number(dni)
-                );
-              }
-
-              if (date_ini && date_fin) {
-                filteredData = filteredData.filter(
-                  (sobre) =>
-                    sobre.sobre_date >= date_ini && sobre.sobre_date <= date_fin
-                );
-              }
-              resolve({ data: filteredData });
-            }
-            break;
-          case "/add_sobre":
-          case "/update_sobre":
-          case "/deleteSobre":
-          default:
-            resolve({
-              message: `Operación simulada exitosa para ${path}`,
-              detail: `Endpoint ${endpoint} llamado.`,
-            });
-            break;
-        }
-      }, MOCK_DELAY);
-    });
+    return handleMockRequest(endpoint);
   }
 
   const url = `${API_BASE_URL}${endpoint}`;
@@ -80,10 +31,15 @@ const apiFetch = async (endpoint, options = {}) => {
   const response = await fetch(url, defaultOptions);
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({
-      error: "Error desconocido en el servidor",
-    }));
-    throw new Error(errorData.error || `Error ${response.status}`);
+    let errorDetail = `Error ${response.status}: ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      // La API devuelve el mensaje en la propiedad 'detail'
+      errorDetail = errorData.detail || JSON.stringify(errorData);
+    } catch (e) {
+      // Si el cuerpo del error no es JSON, usamos el statusText.
+    }
+    throw new Error(errorDetail);
   }
 
   return response.json();
@@ -96,13 +52,13 @@ const apiFetch = async (endpoint, options = {}) => {
  * @param {number|null} filters.dni - DNI del cliente a buscar.
  * @param {string|null} filters.date_ini - Fecha de inicio (opcional, YYYY-MM-DD).
  * @param {string|null} filters.date_fin - Fecha de fin (opcional, YYYY-MM-DD).
- * @returns {Promise<{data: import('@services/_mockData').Sobre[]}>} La lista de sobres.
+ * @returns {Promise<{data: Sobre[]}>} La lista de sobres.
  */
 export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
   const params = new URLSearchParams();
   if (dni) params.append("dni", dni);
-  if (date_ini) params.append("date_ini", date_ini);
-  if (date_fin) params.append("date_fin", date_fin);
+  if (date_ini) params.append("fecha_ini", date_ini);
+  if (date_fin) params.append("fecha_fin", date_fin);
 
   const queryString = params.toString();
   return apiFetch(`/getSobre${queryString ? `?${queryString}` : ""}`, {
@@ -148,5 +104,29 @@ export const updateSobre = (data) => {
   return apiFetch("/update_sobre", {
     method: "PATCH",
     body: JSON.stringify(data),
+  });
+};
+
+/**
+ * Obtiene el siguiente número de sobre disponible.
+ * Corresponde al endpoint `/getNumeroSobre`.
+ * @returns {Promise<number>} El siguiente número de sobre.
+ */
+export const getNumeroSobre = () => {
+  return apiFetch("/getNumeroSobre", {
+    method: "GET",
+  });
+};
+
+/**
+ * Obtiene los datos de un cliente por su DNI.
+ * Corresponde al endpoint `/customers/{dni}`.
+ * @param {Object} params - Los parámetros para la búsqueda.
+ * @param {number} params.dni - El DNI del cliente a buscar.
+ * @returns {Promise<Customer>} Los datos del cliente.
+ */
+export const getCustomer = ({ dni }) => {
+  return apiFetch(`/customers/${dni}`, {
+    method: "GET",
   });
 };

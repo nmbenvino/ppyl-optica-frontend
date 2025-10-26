@@ -5,8 +5,8 @@
  */
 
 /**
- * @typedef {Object} Eye
- * @property {number} id_eye
+ * @typedef {Object} Lens
+ * @property {number} id_lens
  * @property {'cerca' | 'lejos' | 'bifocal'} type - El tipo de lente
  * @property {'od' | 'oi'} lens - El lado del ojo (Ojo Derecho / Ojo Izquierdo)
  * @property {number} esf
@@ -21,7 +21,7 @@
  * @property {string} frame
  * @property {string} organic
  * @property {string} mineral
- * @property {Eye[]} lenss - Array de lentes
+ * @property {Lens[]} lenss - Array de lentes
  */
 
 /**
@@ -159,4 +159,60 @@ export const mockAllSobresResponse = {
       },
     },
   ],
+};
+
+const MOCK_DELAY = 500; // Simula la latencia de la red
+
+/**
+ * Simula una llamada a la API, devolviendo datos de prueba después de un retraso.
+ * A futuro se va a eliminar cuando ya este todo funcionando al 100%.
+ * @param {string} endpoint - El endpoint de la API que se está simulando.
+ * @returns {Promise<any>} Una promesa que resuelve con los datos simulados.
+ */
+export const handleMockRequest = (endpoint) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const [path, queryString] = endpoint.split("?");
+      const params = new URLSearchParams(queryString);
+      console.log(
+        `[MOCK] Calling endpoint: ${path}`,
+        Object.fromEntries(params)
+      );
+
+      switch (path) {
+        case "/getSobre":
+          // Simula tanto la búsqueda por DNI como la general (que antes era get_all_sobres)
+          {
+            const dni = params.get("dni");
+            const date_ini = params.get("fecha_ini");
+            const date_fin = params.get("fecha_fin");
+            let filteredData = mockAllSobresResponse.sobres;
+
+            if (dni) {
+              filteredData = filteredData.filter(
+                (sobre) => sobre.cliente.dni === Number(dni)
+              );
+            }
+
+            if (date_ini && date_fin) {
+              filteredData = filteredData.filter(
+                (sobre) =>
+                  sobre.sobre_date >= date_ini && sobre.sobre_date <= date_fin
+              );
+            }
+            resolve({ data: filteredData });
+          }
+          break;
+        case "/add_sobre":
+        case "/update_sobre":
+        case "/deleteSobre":
+        default:
+          resolve({
+            message: `Operación simulada exitosa para ${path}`,
+            detail: `Endpoint ${endpoint} llamado.`,
+          });
+          break;
+      }
+    }, MOCK_DELAY);
+  });
 };
