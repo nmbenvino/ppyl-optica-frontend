@@ -17,49 +17,63 @@ const FormField = ({
   name,
   disabled,
   options,
+  value,
   ...props
-}) => (
-  <fieldset
-    className={`${formFieldStyles.fieldSet} ${
-      disabled ? formFieldStyles.disabled : ""
-    }`}
-  >
-    <legend className={formFieldStyles.legend}>{label}</legend>
-    {type === "textarea" ? (
-      <textarea
-        id={name}
-        name={name}
-        className={formFieldStyles.textarea}
-        disabled={disabled}
-        {...props}
-      />
-    ) : type === "select" ? (
-      <select
-        id={name}
-        name={name}
-        className={formFieldStyles.input}
-        disabled={disabled}
-        {...props}
-      >
-        {options &&
-          options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-      </select>
-    ) : (
-      <input
-        id={name}
-        name={name}
-        type={type}
-        className={formFieldStyles.input}
-        step={type === "number" ? "any" : undefined}
-        disabled={disabled}
-        {...props}
-      />
-    )}
-  </fieldset>
-);
+}) => {
+  // Si el campo está deshabilitado, forzamos su valor a estar vacío.
+  const displayValue = disabled ? "" : value;
+
+  return (
+    <fieldset
+      className={`${formFieldStyles.fieldSet} ${
+        disabled ? formFieldStyles.disabled : ""
+      }`}
+    >
+      <legend className={formFieldStyles.legend}>{label}</legend>
+      {type === "textarea" ? (
+        <textarea
+          id={name}
+          name={name}
+          className={formFieldStyles.textarea}
+          disabled={disabled}
+          value={displayValue}
+          {...props}
+        />
+      ) : type === "select" ? (
+        <select
+          id={name}
+          name={name}
+          className={formFieldStyles.input}
+          disabled={disabled}
+          value={displayValue}
+          {...props}
+        >
+          {options &&
+            options.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                className={formFieldStyles.option}
+                disabled={option.value === ""}
+              >
+                {option.label}
+              </option>
+            ))}
+        </select>
+      ) : (
+        <input
+          id={name}
+          name={name}
+          type={type}
+          className={formFieldStyles.input}
+          step={type === "number" ? "any" : undefined}
+          disabled={disabled}
+          value={displayValue}
+          {...props}
+        />
+      )}
+    </fieldset>
+  );
+};
 
 export default FormField;

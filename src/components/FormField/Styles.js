@@ -17,4 +17,5 @@ export const formFieldStyles = {
     "bg-transparent w-full h-24 focus:outline-none text-gray-900 dark:text-white resize-none",
   disabled:
     "bg-gray-200 dark:bg-gray-900 bg-[repeating-linear-gradient(45deg,rgba(0,0,0,0.05),rgba(0,0,0,0.05)_10px,transparent_10px,transparent_20px)] dark:bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.09),rgba(255,255,255,0.09)_10px,transparent_10px,transparent_20px)] bg-[length:28px_28px] animate-stripes",
+  option: "dark:bg-gray-900 dark:text-white",
 };

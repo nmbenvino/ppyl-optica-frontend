@@ -27,10 +27,22 @@ const SobrePage = () => {
     formData,
     handleChange,
     handleNewCustomerToggle,
+    handleCustomerSelect,
     isNewCustomer,
+    customers,
     handleSubmit,
   } = useSobrePage(action, id);
 
+  /**
+   * Prepara las opciones para el selector de clientes.
+   */
+  const customerOptions = [
+    { value: "", label: "Seleccionar cliente..." },
+    ...customers.map((c) => ({
+      value: c.dni,
+      label: `${c.dni} - ${c.customer_name} ${c.last_name}`,
+    })),
+  ];
   /**
    * Determina la etiqueta del botón de envío según la acción actual.
    * @returns {string} La etiqueta del botón.
@@ -157,7 +169,7 @@ const SobrePage = () => {
           </div>
 
           {/* Fila 3: Campos de Cliente */}
-          {!isNewCustomer && (
+          {action === "crear" && !isNewCustomer && (
             <>
               <div className={generalInfoStyles.dniSearchFieldContainer}>
                 <FormField
@@ -165,20 +177,19 @@ const SobrePage = () => {
                   type="select"
                   name="dni"
                   value={formData.dni || ""}
-                  onChange={handleChange}
+                  onChange={handleCustomerSelect}
                   disabled={isFormDisabled}
-                  options={[{ value: "", label: "Seleccionar cliente..." }]} // TODO: Cargar dinámicamente
+                  options={customerOptions}
                 />
               </div>
-              <div className={generalInfoStyles.dniSearchFieldContainer}></div>{" "}
-              {/* Empty div for layout */}
+              <div className={generalInfoStyles.dniSearchFieldContainer}></div>
             </>
           )}
           <FormField
             label="DNI"
             type="number"
             name="dni"
-            disabled={isFormDisabled || !isNewCustomer}
+            disabled={isFormDisabled}
             onChange={handleChange}
             value={formData.dni || ""}
           />
@@ -186,7 +197,7 @@ const SobrePage = () => {
             label="Cliente"
             type="text"
             name="cliente"
-            disabled={isFormDisabled || !isNewCustomer}
+            disabled={isFormDisabled}
             onChange={handleChange}
             value={formData.cliente || ""}
           />
@@ -194,7 +205,7 @@ const SobrePage = () => {
             label="Domicilio"
             type="text"
             name="domicilio"
-            disabled={isFormDisabled || !isNewCustomer}
+            disabled={isFormDisabled}
             onChange={handleChange}
             value={formData.domicilio || ""}
           />
@@ -202,7 +213,7 @@ const SobrePage = () => {
             label="Teléfono"
             type="text"
             name="telefono"
-            disabled={isFormDisabled || !isNewCustomer}
+            disabled={isFormDisabled}
             onChange={handleChange}
             value={formData.telefono || ""}
           />

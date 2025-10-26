@@ -48,8 +48,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             type="number"
             name={`${type}_oi_esf`}
             onChange={onChange}
-            value={isOiSelected ? value[`${type}_oi_esf`] || "" : ""}
-            disabled={disabled || !isOiSelected}
+            value={value[`${type}_oi_esf`] || ""}
+            disabled={!isOiSelected || disabled}
           />
         </div>
         <div className={lensTypeSectionStyles.fieldSpan}>
@@ -58,8 +58,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             type="number"
             name={`${type}_oi_cil`}
             onChange={onChange}
-            value={isOiSelected ? value[`${type}_oi_cil`] || "" : ""}
-            disabled={disabled || !isOiSelected}
+            value={value[`${type}_oi_cil`] || ""}
+            disabled={!isOiSelected || disabled}
           />
         </div>
         <div className={lensTypeSectionStyles.fieldSpan}>
@@ -68,8 +68,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             type="number"
             name={`${type}_oi_eje`}
             onChange={onChange}
-            value={isOiSelected ? value[`${type}_oi_eje`] || "" : ""}
-            disabled={disabled || !isOiSelected}
+            value={value[`${type}_oi_eje`] || ""}
+            disabled={!isOiSelected || disabled}
           />
         </div>
       </div>
@@ -101,8 +101,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             type="number"
             name={`${type}_od_esf`}
             onChange={onChange}
-            value={isOdSelected ? value[`${type}_od_esf`] || "" : ""}
-            disabled={disabled || !isOdSelected}
+            value={value[`${type}_od_esf`] || ""}
+            disabled={!isOdSelected || disabled}
           />
         </div>
         <div className={lensTypeSectionStyles.fieldSpan}>
@@ -111,8 +111,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             type="number"
             name={`${type}_od_cil`}
             onChange={onChange}
-            value={isOdSelected ? value[`${type}_od_cil`] || "" : ""}
-            disabled={disabled || !isOdSelected}
+            value={value[`${type}_od_cil`] || ""}
+            disabled={!isOdSelected || disabled}
           />
         </div>
         <div className={lensTypeSectionStyles.fieldSpan}>
@@ -121,8 +121,8 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             type="number"
             name={`${type}_od_eje`}
             onChange={onChange}
-            value={isOdSelected ? value[`${type}_od_eje`] || "" : ""}
-            disabled={disabled || !isOdSelected}
+            value={value[`${type}_od_eje`] || ""}
+            disabled={!isOdSelected || disabled}
           />
         </div>
       </div>
