@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockAllSobresResponse } from "@services/_mockData";
-import { addSobre, updateSobre, deleteSobre } from "@services/sobres";
+import {
+  addSobre,
+  updateSobre,
+  deleteSobre,
+  getNumeroSobre,
+  getCustomers,
+} from "@services/sobres";
 import { useNotification } from "@components/Notification/useNotification.js";
 // import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
 
@@ -31,6 +37,7 @@ export const useSobrePage = (action, id) => {
     return localDate.toISOString().split("T")[0];
   };
   const [formData, setFormData] = useState({
+    // Inicializa la fecha al cargar el componente
     fecha: getLocalDate(new Date()),
   });
   const [isNewCustomer, setIsNewCustomer] = useState(true);
@@ -38,6 +45,7 @@ export const useSobrePage = (action, id) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { addNotification } = useNotification();
+  const [customers, setCustomers] = useState([]);
 
   const isFormDisabled = action === "ver" || action === "eliminar";
 
@@ -74,10 +82,13 @@ export const useSobrePage = (action, id) => {
       mineral: sobre.glasses.mineral,
     };
 
-    // Mapeo de lentes
+    // Mapeo de lentes: cada ojo puede tener un tipo de lente diferente.
     sobre.glasses.lenss.forEach((lens) => {
       const { type, lens: eyeSide, esf, cil, eje } = lens;
-      flatData["tipo_lente"] = type; // Se establece el tipo de lente seleccionado
+      // Se establece el tipo de lente para el ojo correspondiente (od/oi)
+      flatData[`tipo_lente_${eyeSide}`] = type;
+
+      // Se asignan los valores de graduación a los campos específicos del tipo y ojo.
       flatData[`${type}_${eyeSide}_esf`] = esf;
       flatData[`${type}_${eyeSide}_cil`] = cil;
       flatData[`${type}_${eyeSide}_eje`] = eje;
@@ -87,33 +98,48 @@ export const useSobrePage = (action, id) => {
   };
 
   useEffect(() => {
-    // Si la acción no es 'crear' y hay un ID, buscamos los datos del sobre.
-    if (action !== "crear" && id) {
-      const fetchSobreData = async () => {
-        setLoading(true);
-        try {
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        // Siempre se obtienen los clientes para el selector
+        const customersData = await getCustomers();
+        setCustomers(customersData);
+
+        if (action === "crear") {
+          // Si estamos creando, obtenemos el siguiente número de sobre.
+          const nextSobreNumber = await getNumeroSobre();
+          setFormData((prev) => ({
+            ...prev,
+            numero_sobre: nextSobreNumber,
+          }));
+        } else if (id) {
+          // Si estamos editando/viendo/eliminando, buscamos los datos del sobre.
           console.log(`Buscando datos para el sobre con ID: ${id}`);
           // const response = await getSobres({ id_sobre: id }); // TODO: Ajustar API si se busca por id_sobre
 
           // --- Simulación con mock data ---
           const sobreEncontrado = mockAllSobresResponse.sobres.find(
-            (s) => s.id_sobre === parseInt(id)
+            (s) => s.id_sobre === parseInt(id, 10)
           );
 
           if (sobreEncontrado) {
             setFormData(transformSobreToFormData(sobreEncontrado));
+            // Si el cliente no es nuevo, lo indicamos en el estado
+            if (sobreEncontrado.cliente) {
+              setIsNewCustomer(false);
+            }
           } else {
             setError(`No se encontró el sobre con ID ${id}`);
           }
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
         }
-      };
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      fetchSobreData();
-    }
+    fetchInitialData();
   }, [action, id]);
 
   /**
@@ -156,31 +182,59 @@ export const useSobrePage = (action, id) => {
   };
 
   /**
+   * Maneja la selección de un cliente existente desde el dropdown.
+   * @param {React.ChangeEvent<HTMLSelectElement>} e - El evento de cambio del select.
+   */
+  const handleCustomerSelect = (e) => {
+    const selectedDni = e.target.value;
+    const selectedCustomer = customers.find(
+      (c) => c.dni === Number(selectedDni)
+    );
+
+    if (selectedCustomer) {
+      setFormData((prev) => ({
+        ...prev,
+        dni: selectedCustomer.dni,
+        cliente: `${selectedCustomer.customer_name} ${selectedCustomer.last_name}`,
+        domicilio: selectedCustomer.address,
+        telefono: selectedCustomer.phone,
+      }));
+    } else {
+      // Si se deselecciona, se limpian los campos
+      handleChange(e); // Deja que el handleChange genérico limpie el DNI
+      handleNewCustomerToggle({ target: { checked: false } }); // Llama a la lógica de limpieza
+    }
+  };
+
+  /**
    * Transforma los datos planos del formulario a la estructura anidada que espera la API.
    * @param {object} data - El estado `formData` del formulario.
    * @returns {object} El payload listo para ser enviado a la API.
    */
   const transformFormDataToApiPayload = (data) => {
-    const selectedLensType = data.tipo_lente;
     const lenss = [];
+    const lensTypeOD = data.tipo_lente_od;
+    const lensTypeOI = data.tipo_lente_oi;
 
-    // Solo incluimos los datos de los lentes si se ha seleccionado un tipo
-    if (selectedLensType) {
-      // Lente OD
+    // Añadir lente OD si se ha seleccionado un tipo
+    if (lensTypeOD) {
       lenss.push({
-        type: selectedLensType,
+        type: lensTypeOD,
         lens: "od",
-        esf: Number(data[`${selectedLensType}_od_esf`]) || 0,
-        cil: Number(data[`${selectedLensType}_od_cil`]) || 0,
-        eje: Number(data[`${selectedLensType}_od_eje`]) || 0,
+        esf: Number(data[`${lensTypeOD}_od_esf`]) || 0,
+        cil: Number(data[`${lensTypeOD}_od_cil`]) || 0,
+        eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
       });
-      // Lente OI
+    }
+
+    // Añadir lente OI si se ha seleccionado un tipo
+    if (lensTypeOI) {
       lenss.push({
-        type: selectedLensType,
+        type: lensTypeOI,
         lens: "oi",
-        esf: Number(data[`${selectedLensType}_oi_esf`]) || 0,
-        cil: Number(data[`${selectedLensType}_oi_cil`]) || 0,
-        eje: Number(data[`${selectedLensType}_oi_eje`]) || 0,
+        esf: Number(data[`${lensTypeOI}_oi_esf`]) || 0,
+        cil: Number(data[`${lensTypeOI}_oi_cil`]) || 0,
+        eje: Number(data[`${lensTypeOI}_oi_eje`]) || 0,
       });
     }
 
@@ -267,6 +321,8 @@ export const useSobrePage = (action, id) => {
     handleChange,
     handleNewCustomerToggle,
     isNewCustomer,
+    customers,
+    handleCustomerSelect,
     handleSubmit,
   };
 };
