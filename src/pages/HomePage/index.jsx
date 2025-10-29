@@ -34,6 +34,11 @@ const HomePage = () => {
   };
   const today = getLocalDate(new Date());
 
+  // Encuentra el objeto completo del sobre seleccionado para pasarlo en el estado de la navegación.
+  const sobreSeleccionadoCompleto = sobres.find(
+    (s) => s.id_sobre === selectedSobre.id
+  );
+
   /**
    * Formatea una fecha de YYYY-MM-DD a DD/MM/YYYY.
    * @param {string} dateString - La fecha en formato YYYY-MM-DD.
@@ -54,9 +59,13 @@ const HomePage = () => {
           <Button as="link" to="/sobres/crear" variant="primary">
             Crear Sobre
           </Button>
+
           <Button
             as="link"
-            to={`/sobres/editar/${selectedSobre.id}`}
+            to={{
+              pathname: `/sobres/editar/${selectedSobre.id}`,
+              state: { sobre: sobreSeleccionadoCompleto },
+            }}
             variant="secondary"
             disabled={isActionDisabled}
           >
@@ -64,7 +73,10 @@ const HomePage = () => {
           </Button>
           <Button
             as="link"
-            to={`/sobres/ver/${selectedSobre.id}`}
+            to={{
+              pathname: `/sobres/ver/${selectedSobre.id}`,
+              state: { sobre: sobreSeleccionadoCompleto },
+            }}
             variant="secondary"
             disabled={isActionDisabled}
           >
@@ -72,7 +84,10 @@ const HomePage = () => {
           </Button>
           <Button
             as="link"
-            to={`/sobres/eliminar/${selectedSobre.id}`}
+            to={{
+              pathname: `/sobres/eliminar/${selectedSobre.id}`,
+              state: { sobre: sobreSeleccionadoCompleto },
+            }}
             variant="danger"
             disabled={isActionDisabled}
           >
