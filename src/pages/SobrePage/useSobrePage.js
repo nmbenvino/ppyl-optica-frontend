@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { mockAllSobresResponse } from "@services/_mockData";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   addSobre,
   updateSobre,
@@ -44,6 +43,8 @@ export const useSobrePage = (action, id) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const sobreDesdeEstado = location.state?.sobre; // Accede al sobre enviado desde HomePage
   const { addNotification } = useNotification();
   const [customers, setCustomers] = useState([]);
 
@@ -112,25 +113,20 @@ export const useSobrePage = (action, id) => {
             ...prev,
             numero_sobre: nextSobreNumber,
           }));
-        } else if (id) {
-          // Si estamos editando/viendo/eliminando, buscamos los datos del sobre.
-          console.log(`Buscando datos para el sobre con ID: ${id}`);
-          // const response = await getSobres({ id_sobre: id }); // TODO: Ajustar API si se busca por id_sobre
-
-          // --- Simulación con mock data ---
-          const sobreEncontrado = mockAllSobresResponse.sobres.find(
-            (s) => s.id_sobre === parseInt(id, 10)
-          );
-
-          if (sobreEncontrado) {
-            setFormData(transformSobreToFormData(sobreEncontrado));
-            // Si el cliente no es nuevo, lo indicamos en el estado
-            if (sobreEncontrado.cliente) {
-              setIsNewCustomer(false);
-            }
-          } else {
-            setError(`No se encontró el sobre con ID ${id}`);
+        } else if (id && sobreDesdeEstado) {
+          // Para editar/ver/eliminar, usamos los datos pasados por el estado de la navegación.
+          setFormData(transformSobreToFormData(sobreDesdeEstado));
+          if (sobreDesdeEstado.cliente) {
+            setIsNewCustomer(false);
           }
+        } else if (id && !sobreDesdeEstado) {
+          // Si hay un ID pero no hay estado (ej: recarga de página), no podemos mostrar datos.
+          // Redirigimos al inicio para evitar una página vacía o con errores.
+          addNotification(
+            "No se encontraron datos para mostrar, se redirigió al inicio.",
+            "warning"
+          );
+          navigate("/");
         }
       } catch (err) {
         setError(err.message);
@@ -140,7 +136,7 @@ export const useSobrePage = (action, id) => {
     };
 
     fetchInitialData();
-  }, [action, id]);
+  }, [action, id, sobreDesdeEstado]);
 
   /**
    * Manejador genérico para actualizar el estado del formulario cuando un campo cambia.
