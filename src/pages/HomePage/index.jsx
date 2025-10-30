@@ -34,6 +34,28 @@ const HomePage = () => {
   };
   const today = getLocalDate(new Date());
 
+  // Lógica para habilitar/deshabilitar el botón de búsqueda
+  const isSearchDisabled = () => {
+    const { dni, date_ini, date_fin } = filters;
+
+    // Si no hay ningún campo ingresado, deshabilitar
+    if (!dni && !date_ini && !date_fin) {
+      return true;
+    }
+
+    // Si hay fechas (con o sin DNI), ambas deben estar presentes
+    if (date_ini || date_fin) {
+      return !date_ini || !date_fin; // Deshabilitar si falta alguna fecha
+    }
+
+    // Si solo hay DNI (sin fechas), habilitar
+    if (dni && !date_ini && !date_fin) {
+      return false;
+    }
+
+    return false;
+  };
+
   // Encuentra el objeto completo del sobre seleccionado para pasarlo en el estado de la navegación.
   const sobreSeleccionadoCompleto = sobres.find(
     (s) => s.id_sobre === selectedSobre.id
@@ -119,7 +141,7 @@ const HomePage = () => {
           max={today}
           containerClassName={homePageStyles.filterGroup}
         />
-        <Button onClick={handleSearch} variant="primary">
+        <Button onClick={handleSearch} variant="primary" disabled={isSearchDisabled()}>
           Buscar
         </Button>
       </div>
