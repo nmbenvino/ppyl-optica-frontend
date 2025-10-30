@@ -20,8 +20,8 @@ const FormField = ({
   value,
   ...props
 }) => {
-  // Si el campo está deshabilitado, forzamos su valor a estar vacío.
-  const displayValue = disabled ? "" : value;
+  // Los campos deshabilitados aún deben mostrar su valor
+  const displayValue = value;
 
   return (
     <fieldset

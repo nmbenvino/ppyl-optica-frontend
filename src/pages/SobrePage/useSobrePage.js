@@ -8,7 +8,7 @@ import {
   getCustomers,
 } from "@services/sobres";
 import { useNotification } from "@components/Notification/useNotification.js";
-// import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
+import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
 
 /**
  * Hook para manejar la lógica de la página de gestión de Sobres.
@@ -45,6 +45,8 @@ export const useSobrePage = (action, id) => {
   const navigate = useNavigate();
   const location = useLocation();
   const sobreDesdeEstado = location.state?.sobre; // Accede al sobre enviado desde HomePage
+  console.log(location)
+  console.log ("Sobre desde estado:", sobreDesdeEstado);
   const { addNotification } = useNotification();
   const [customers, setCustomers] = useState([]);
 

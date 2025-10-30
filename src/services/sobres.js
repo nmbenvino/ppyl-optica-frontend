@@ -4,7 +4,7 @@
 import { handleMockRequest } from "@services/_mockData.js";
 
 const API_BASE_URL = "http://localhost:8000";
-const USE_MOCK_DATA = true; // Cambiar a false para usar la API real
+const USE_MOCK_DATA = false; // Cambiar a false para usar la API real
 
 /**
  * Realiza una petición fetch y maneja la respuesta y los errores.
@@ -54,14 +54,15 @@ const apiFetch = async (endpoint, options = {}) => {
  * @param {string|null} filters.date_fin - Fecha de fin (opcional, YYYY-MM-DD).
  * @returns {Promise<{data: Sobre[]}>} La lista de sobres.
  */
-export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
+export const getSobres = ({ dni = null, date_ini = null, date_fin = null, id_sobre = null }) => {
   const params = new URLSearchParams();
   if (dni) params.append("dni", dni);
   if (date_ini) params.append("fecha_ini", date_ini);
   if (date_fin) params.append("fecha_fin", date_fin);
+  if (id_sobre) params.append("id_sobre", id_sobre);
 
   const queryString = params.toString();
-  return apiFetch(`/getSobre${queryString ? `?${queryString}` : ""}`, {
+  return apiFetch(`/sobre/getSobre${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
 };
@@ -73,7 +74,7 @@ export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const addSobre = (data) => {
-  return apiFetch("/add_sobre", {
+  return apiFetch("/sobre/add_sobre", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -88,7 +89,7 @@ export const addSobre = (data) => {
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const deleteSobre = ({ dni, sobre_number }) => {
-  return apiFetch("/deleteSobre", {
+  return apiFetch("/sobre/deleteSobre", {
     method: "DELETE",
     body: JSON.stringify({ dni, sobre_number }),
   });
@@ -101,7 +102,7 @@ export const deleteSobre = ({ dni, sobre_number }) => {
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const updateSobre = (data) => {
-  return apiFetch("/update_sobre", {
+  return apiFetch("/sobre/update_sobre", {
     method: "PATCH",
     body: JSON.stringify(data),
   });
@@ -113,7 +114,7 @@ export const updateSobre = (data) => {
  * @returns {Promise<number>} El siguiente número de sobre.
  */
 export const getNumeroSobre = () => {
-  return apiFetch("/getNumeroSobre", {
+  return apiFetch("/sobre/getNumeroSobre", {
     method: "GET",
   });
 };
