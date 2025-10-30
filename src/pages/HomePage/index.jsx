@@ -62,10 +62,8 @@ const HomePage = () => {
 
           <Button
             as="link"
-            to={{
-              pathname: `/sobres/editar/${selectedSobre.id}`,
-              state: { sobre: sobreSeleccionadoCompleto },
-            }}
+            to={`/sobres/editar/${selectedSobre.id}`}
+            state={{ sobre: sobreSeleccionadoCompleto }}
             variant="secondary"
             disabled={isActionDisabled}
           >
@@ -73,10 +71,8 @@ const HomePage = () => {
           </Button>
           <Button
             as="link"
-            to={{
-              pathname: `/sobres/ver/${selectedSobre.id}`,
-              state: { sobre: sobreSeleccionadoCompleto },
-            }}
+            to={`/sobres/ver/${selectedSobre.id}`}
+            state={{ sobre: sobreSeleccionadoCompleto }}
             variant="secondary"
             disabled={isActionDisabled}
           >
@@ -84,10 +80,8 @@ const HomePage = () => {
           </Button>
           <Button
             as="link"
-            to={{
-              pathname: `/sobres/eliminar/${selectedSobre.id}`,
-              state: { sobre: sobreSeleccionadoCompleto },
-            }}
+            to={`/sobres/eliminar/${selectedSobre.id}`}
+            state={{ sobre: sobreSeleccionadoCompleto }}
             variant="danger"
             disabled={isActionDisabled}
           >
