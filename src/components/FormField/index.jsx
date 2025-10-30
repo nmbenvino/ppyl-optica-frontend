@@ -20,9 +20,6 @@ const FormField = ({
   value,
   ...props
 }) => {
-  // Si el campo está deshabilitado, forzamos su valor a estar vacío.
-  const displayValue = disabled ? "" : value;
-
   return (
     <fieldset
       className={`${formFieldStyles.fieldSet} ${
@@ -36,7 +33,7 @@ const FormField = ({
           name={name}
           className={formFieldStyles.textarea}
           disabled={disabled}
-          value={displayValue}
+          value={value}
           {...props}
         />
       ) : type === "select" ? (
@@ -45,7 +42,7 @@ const FormField = ({
           name={name}
           className={formFieldStyles.input}
           disabled={disabled}
-          value={displayValue}
+          value={value}
           {...props}
         >
           {options &&
@@ -68,7 +65,7 @@ const FormField = ({
           className={formFieldStyles.input}
           step={type === "number" ? "any" : undefined}
           disabled={disabled}
-          value={displayValue}
+          value={value}
           {...props}
         />
       )}
