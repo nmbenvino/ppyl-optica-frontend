@@ -4,7 +4,7 @@
 import { handleMockRequest } from "@services/_mockData.js";
 
 const API_BASE_URL = "http://localhost:8000";
-const USE_MOCK_DATA = true; // Cambiar a false para usar la API real
+const USE_MOCK_DATA = false; // Cambiar a false para usar la API real
 
 /**
  * Realiza una petición fetch y maneja la respuesta y los errores.
@@ -61,7 +61,7 @@ export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
   if (date_fin) params.append("fecha_fin", date_fin);
 
   const queryString = params.toString();
-  return apiFetch(`/getSobre${queryString ? `?${queryString}` : ""}`, {
+  return apiFetch(`/sobre/getSobre${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
 };
@@ -73,7 +73,7 @@ export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const addSobre = (data) => {
-  return apiFetch("/add_sobre", {
+  return apiFetch("/sobre/add_sobre", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -88,7 +88,7 @@ export const addSobre = (data) => {
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const deleteSobre = ({ dni, sobre_number }) => {
-  return apiFetch("/deleteSobre", {
+  return apiFetch("/sobre/deleteSobre", {
     method: "DELETE",
     body: JSON.stringify({ dni, sobre_number }),
   });
@@ -101,7 +101,7 @@ export const deleteSobre = ({ dni, sobre_number }) => {
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const updateSobre = (data) => {
-  return apiFetch("/update_sobre", {
+  return apiFetch("/sobre/update_sobre", {
     method: "PATCH",
     body: JSON.stringify(data),
   });
@@ -113,7 +113,7 @@ export const updateSobre = (data) => {
  * @returns {Promise<number>} El siguiente número de sobre.
  */
 export const getNumeroSobre = () => {
-  return apiFetch("/getNumeroSobre", {
+  return apiFetch("/sobre/getNumeroSobre", {
     method: "GET",
   });
 };
