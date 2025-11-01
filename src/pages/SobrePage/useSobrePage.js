@@ -310,7 +310,6 @@ export const useSobrePage = (action, id) => {
     try {
       if (action === "crear") {
         const payload = transformFormDataToApiPayload(formData);
-        payload.edit = false;
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
