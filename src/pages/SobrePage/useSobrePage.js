@@ -271,6 +271,10 @@ export const useSobrePage = (action, id) => {
     if (action === "editar") {
       payload.sobre_number = data.numero_sobre;
     }
+    //logica para manejar clientes ya existentes
+      if (!isNewCustomer && data.dni) {
+      payload.dni = Number(data.dni);
+    }   
 
     return payload;
   };
@@ -287,6 +291,7 @@ export const useSobrePage = (action, id) => {
     try {
       if (action === "crear") {
         const payload = transformFormDataToApiPayload(formData);
+        payload.edit = false;
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
