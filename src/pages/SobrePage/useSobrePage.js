@@ -40,10 +40,12 @@ export const useSobrePage = (action, id) => {
     fecha: getLocalDate(new Date()),
   });
   const [isNewCustomer, setIsNewCustomer] = useState(true);
+  const [isCustomerModified, setIsCustomerModified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [originalDni, setOriginalDni] = useState(null);
   const sobreDesdeEstado = location.state?.sobre; // Accede al sobre enviado desde HomePage
   const { addNotification } = useNotification();
   const [customers, setCustomers] = useState([]);
@@ -118,6 +120,7 @@ export const useSobrePage = (action, id) => {
           setFormData(transformSobreToFormData(sobreDesdeEstado));
           if (sobreDesdeEstado.cliente) {
             setIsNewCustomer(false);
+            setOriginalDni(sobreDesdeEstado.cliente.dni);
           }
         } else if (id && !sobreDesdeEstado) {
           // Si hay un ID pero no hay estado (ej: recarga de página), no podemos mostrar datos.
@@ -154,6 +157,13 @@ export const useSobrePage = (action, id) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    // Nuevo: si el usuario cambia datos del cliente existente, marcarlo como modificado
+  if (
+    !isNewCustomer &&
+    ["cliente", "domicilio", "telefono", "dni"].includes(name)
+  ) {
+    setIsCustomerModified(true);
+  }
   };
 
   /**
@@ -195,6 +205,8 @@ export const useSobrePage = (action, id) => {
         domicilio: selectedCustomer.address,
         telefono: selectedCustomer.phone,
       }));
+      setIsCustomerModified(false);
+      setOriginalDni(selectedCustomer.dni);
     } else {
       // Si se deselecciona, se limpian los campos
       handleChange(e); // Deja que el handleChange genérico limpie el DNI
@@ -253,29 +265,36 @@ export const useSobrePage = (action, id) => {
         lenss: lenss,
       },
     };
+   // CASO 1: Cliente nuevo
+  if (isNewCustomer) {
+    payload.edit = false;
+    payload.customer = {
+      customer_name: data.cliente?.split(" ")[0] || "",
+      last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
+      dni: Number(data.dni) || 0,
+      address: data.domicilio,
+      phone: data.telefono,
+    };
+  }
 
-    // Para /add_sobre, se necesita la información del cliente
-    if (action === "crear") {
-      // TODO: Implementar lógica para detectar si el cliente ya existe.
-      // Por ahora, asumimos que siempre es un cliente nuevo.
-      payload.customer = {
-        customer_name: data.cliente?.split(" ")[0] || "",
-        last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-        dni: Number(data.dni) || 0,
-        address: data.domicilio,
-        phone: data.telefono,
-      };
-    }
+  // CASO 2: Cliente existente sin cambios
+  else if (!isCustomerModified) {
+    payload.edit = false;
+    payload.dni = Number(data.dni);
+  }
 
-    // Para /update_sobre, se necesita el `sobre_number` en el nivel raíz
-    if (action === "editar") {
-      payload.sobre_number = data.numero_sobre;
-    }
-    //logica para manejar clientes ya existentes
-      if (!isNewCustomer && data.dni) {
-      payload.dni = Number(data.dni);
-    }   
-
+  // CASO 3: Cliente existente con cambios
+  else if (isCustomerModified) {
+    payload.edit = true;
+    payload.dni = Number(originalDni); // 👈 el DNI original (viejo)
+    payload.customer = {
+      customer_name: data.cliente?.split(" ")[0] || "",
+      last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
+      dni: Number(data.dni) || 0, // 👈 el nuevo (si cambió)
+      address: data.domicilio,
+      phone: data.telefono,
+    };
+  }
     return payload;
   };
 
