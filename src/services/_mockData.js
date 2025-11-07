@@ -217,9 +217,15 @@ export const handleMockRequest = (endpoint) => {
             const dni = params.get("dni");
             const date_ini = params.get("fecha_ini");
             const date_fin = params.get("fecha_fin");
+            const id_sobre = params.get("id_sobre");
             let filteredData = mockAllSobresResponse.sobres;
 
-            if (dni) {
+            if (id_sobre) {
+              // Filtrar por ID de sobre específico
+              filteredData = filteredData.filter(
+                (sobre) => sobre.id_sobre === Number(id_sobre)
+              );
+            } else if (dni) {
               filteredData = filteredData.filter(
                 (sobre) => sobre.cliente.dni === Number(dni)
               );

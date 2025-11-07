@@ -54,11 +54,12 @@ const apiFetch = async (endpoint, options = {}) => {
  * @param {string|null} filters.date_fin - Fecha de fin (opcional, YYYY-MM-DD).
  * @returns {Promise<{data: Sobre[]}>} La lista de sobres.
  */
-export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
+export const getSobres = ({ dni = null, date_ini = null, date_fin = null, id_sobre = null }) => {
   const params = new URLSearchParams();
   if (dni) params.append("dni", dni);
   if (date_ini) params.append("fecha_ini", date_ini);
   if (date_fin) params.append("fecha_fin", date_fin);
+  if (id_sobre) params.append("id_sobre", id_sobre);
 
   const queryString = params.toString();
   return apiFetch(`/sobre/getSobre${queryString ? `?${queryString}` : ""}`, {
