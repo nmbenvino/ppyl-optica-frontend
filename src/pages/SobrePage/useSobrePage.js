@@ -6,6 +6,7 @@ import {
   deleteSobre,
   getNumeroSobre,
   getCustomers,
+  updateCustomer,
 } from "@services/sobres";
 import { useNotification } from "@components/Notification/useNotification.js";
 import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
@@ -221,12 +222,19 @@ export const useSobrePage = (action, id) => {
    * @param {object} data - El estado `formData` del formulario.
    * @returns {object} El payload listo para ser enviado a la API.
    */
-  const transformFormDataToApiPayload = (data) => {
+
+  /**
+   * Transforma los datos planos del formulario a la estructura anidada que espera la API.
+   * @param {object} data - El estado `formData` del formulario.
+   * @param {'crear' | 'editar'} action - La acción para determinar la estructura del payload.
+   * @returns {object} El payload listo para ser enviado a la API.
+   */
+  const transformFormDataToApiPayload = (data, action) => {
+    // Esta parte (armar lentes) es igual para crear y editar
     const lenss = [];
     const lensTypeOD = data.tipo_lente_od;
     const lensTypeOI = data.tipo_lente_oi;
 
-    // Añadir lente OD si se ha seleccionado un tipo
     if (lensTypeOD) {
       lenss.push({
         type: lensTypeOD,
@@ -236,8 +244,6 @@ export const useSobrePage = (action, id) => {
         eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
       });
     }
-
-    // Añadir lente OI si se ha seleccionado un tipo
     if (lensTypeOI) {
       lenss.push({
         type: lensTypeOI,
@@ -248,59 +254,82 @@ export const useSobrePage = (action, id) => {
       });
     }
 
-    // Estructura para /add_sobre y /update_sobre
-    const payload = {
-      sobre: {
-        social_work: data.obra_social,
-        billing: data.facturacion,
-        recipe: data.receta_doctor,
-        observations: data.observaciones,
-        total: Number(data.total) || 0,
-        advance_payment: Number(data.sena) || 0,
-        sobre_date: data.fecha,
-      },
-      glasses: {
-        color: data.color,
-        frame: data.armazon,
-        organic: data.organico,
-        mineral: data.mineral,
-        lenss: lenss,
-      },
-    };
-   // CASO 1: Cliente nuevo
-  if (isNewCustomer) {
-    payload.edit = false;
-    payload.customer = {
-      customer_name: data.cliente?.split(" ")[0] || "",
-      last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-      dni: Number(data.dni) || 0,
-      address: data.domicilio,
-      phone: data.telefono,
-    };
-  }
+    // --- LÓGICA DE PAYLOAD SEPARADA ---
 
-  // CASO 2: Cliente existente sin cambios
-  else if (!isCustomerModified) {
-    payload.edit = false;
-    payload.dni = Number(data.dni);
-  }
+    if (action === 'crear') {
+      // PAYLOAD PARA CREAR (AddSobreIn) - Como estaba antes
+      const payload = {
+        sobre: {
+          social_work: data.obra_social,
+          billing: data.facturacion,
+          recipe: data.receta_doctor,
+          observations: data.observaciones,
+          total: Number(data.total) || 0,
+          advance_payment: Number(data.sena) || 0,
+          sobre_date: data.fecha,
+        },
+        glasses: {
+          color: data.color,
+          frame: data.armazon,
+          organic: data.organico,
+          mineral: data.mineral,
+          lenss: lenss,
+        },
+      };
 
-  // CASO 3: Cliente existente con cambios
-  else if (isCustomerModified) {
-    payload.edit = true;
-    payload.dni = Number(originalDni); // 👈 el DNI original (viejo)
-    payload.customer = {
-      customer_name: data.cliente?.split(" ")[0] || "",
-      last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-      dni: Number(data.dni) || 0, // 👈 el nuevo (si cambió)
-      address: data.domicilio,
-      phone: data.telefono,
-    };
-  }
-    return payload;
+      if (isNewCustomer) {
+        payload.edit = false;
+        payload.customer = {
+          customer_name: data.cliente?.split(" ")[0] || "",
+          last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
+          dni: Number(data.dni) || 0,
+          address: data.domicilio,
+          phone: data.telefono,
+        };
+      } else if (!isCustomerModified) {
+        payload.edit = false;
+        payload.dni = Number(data.dni);
+      } else if (isCustomerModified) {
+        payload.edit = true;
+        payload.dni = Number(originalDni);
+        payload.customer = {
+          customer_name: data.cliente?.split(" ")[0] || "",
+          last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
+          dni: Number(data.dni) || 0,
+          address: data.domicilio,
+          phone: data.telefono,
+        };
+      }
+      return payload;
+    }
+
+    if (action === 'editar') {
+      // PAYLOAD PARA EDITAR (SobreUpdatePayload) - ¡Sin cliente!
+      const payload = {
+        sobre_number: Number(data.numero_sobre), // 👈 Identificador
+        sobre: {
+          social_work: data.obra_social,
+          billing: data.facturacion,
+          recipe: data.receta_doctor,
+          observations: data.observaciones,
+          total: Number(data.total) || 0,
+          advance_payment: Number(data.sena) || 0,
+          sobre_date: data.fecha,
+        },
+        glasses: {
+          color: data.color,
+          frame: data.armazon,
+          organic: data.organico,
+          mineral: data.mineral,
+          lenss: lenss,
+        },
+      };
+      return payload;
+    }
   };
 
-  /**
+
+/**
    * Manejador para el envío del formulario.
    * @param {React.FormEvent<HTMLFormElement>} e - El evento del formulario.
    */
@@ -311,24 +340,49 @@ export const useSobrePage = (action, id) => {
 
     try {
       if (action === "crear") {
-        const payload = transformFormDataToApiPayload(formData);
+        // --- LÓGICA DE CREAR (Como antes, pero pasamos la acción) ---
+        const payload = transformFormDataToApiPayload(formData, "crear");
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
+
       } else if (action === "editar") {
-        const payload = transformFormDataToApiPayload(formData);
-        await updateSobre(payload);
+        // --- ¡NUEVA LÓGICA DE EDITAR! ---
+
+        // 1. Prepara y envía el payload del SOBRE
+        const sobrePayload = transformFormDataToApiPayload(formData, "editar");
+        await updateSobre(sobrePayload);
         addNotification("Sobre actualizado exitosamente", "success");
+
+        // 2. Verifica si el cliente también se modificó
+        if (isCustomerModified) {
+          // Si el cliente cambió, preparamos su payload
+          const customerPayload = {
+            customer_name: formData.cliente?.split(" ")[0] || "",
+            last_name: formData.cliente?.split(" ").slice(1).join(" ") || "",
+            dni: Number(formData.dni) || 0,
+            address: formData.domicilio,
+            phone: formData.telefono,
+          };
+          
+          // Y llamamos a la API de clientes por separado
+          await updateCustomer(originalDni, customerPayload);
+          addNotification("Datos del cliente actualizados", "success");
+        }
+
       } else if (action === "eliminar") {
+        // --- LÓGICA DE ELIMINAR (Como antes) ---
         await deleteSobre({
           dni: formData.dni,
           sobre_number: formData.numero_sobre,
         });
         addNotification("Sobre eliminado exitosamente", "success");
       }
+
       navigate("/"); // Redirige a la página principal tras una operación exitosa
+
     } catch (err) {
       setError(err.message);
-      addNotification(`Error: ${err.message}`, "error"); // Muestra el error al usuario
+      addNotification(`Error: ${err.message}`, "error");
     } finally {
       setLoading(false);
     }

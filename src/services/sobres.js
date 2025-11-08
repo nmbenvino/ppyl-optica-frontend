@@ -129,3 +129,17 @@ export const getCustomers = () => {
     method: "GET",
   });
 };
+y
+/**
+ * Actualiza un cliente existente por DNI.
+ * Corresponde al endpoint `/customers/{dni}`.
+ * @param {number} dni - El DNI original del cliente a actualizar.
+ * @param {Object} data - Los datos del cliente a modificar (customer_name, last_name, dni, address, phone).
+ * @returns {Promise<Object>} El mensaje de éxito.
+ */
+export const updateCustomer = (dni, data) => {
+  return apiFetch(`/customers/${dni}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+};
