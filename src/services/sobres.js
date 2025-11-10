@@ -101,8 +101,9 @@ export const deleteSobre = ({ dni, sobre_number }) => {
  * @param {Object} data - Los datos a actualizar. El `sobre_number` es obligatorio para identificar el sobre.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
-export const updateSobre = (data) => {
-  return apiFetch("/sobre/update_sobre", {
+export const updateSobre = (sobre_number, data) => {
+  // Ahora usamos el 'sobre_number' para construir la URL correcta
+  return apiFetch(`/sobre/update_sobre/${sobre_number}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
@@ -129,7 +130,7 @@ export const getCustomers = () => {
     method: "GET",
   });
 };
-y
+
 /**
  * Actualiza un cliente existente por DNI.
  * Corresponde al endpoint `/customers/{dni}`.

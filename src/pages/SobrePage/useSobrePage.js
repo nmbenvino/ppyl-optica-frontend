@@ -345,12 +345,10 @@ export const useSobrePage = (action, id) => {
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
 
-      } else if (action === "editar") {
-        // --- ¡NUEVA LÓGICA DE EDITAR! ---
-
+      } else if (action === "editar") {             //Solo Dios y gpt sabian como funcionaba esto. Ahora solo gpt sabe...
         // 1. Prepara y envía el payload del SOBRE
         const sobrePayload = transformFormDataToApiPayload(formData, "editar");
-        await updateSobre(sobrePayload);
+        await updateSobre(sobrePayload.sobre_number, sobrePayload);
         addNotification("Sobre actualizado exitosamente", "success");
 
         // 2. Verifica si el cliente también se modificó
