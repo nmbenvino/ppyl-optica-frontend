@@ -213,7 +213,7 @@ const SobrePage = () => {
             label="Teléfono"
             type="text"
             name="telefono"
-            disabled={isFormDisabled}
+            disabled={isFormDisabled || action === "editar"}
             onChange={handleChange}
             value={formData.telefono || ""}
           />

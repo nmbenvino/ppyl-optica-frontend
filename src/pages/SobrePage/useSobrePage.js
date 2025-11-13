@@ -267,15 +267,15 @@ export const useSobrePage = (action, id) => {
         lenss: lenss,
       },
     };
-   // CASO 1: Cliente nuevo
+// CASO 1: Cliente nuevo
   if (isNewCustomer) {
     payload.edit = false;
     payload.customer = {
       customer_name: data.cliente?.split(" ")[0] || "",
       last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
       dni: Number(data.dni) || 0,
-      address: data.domicilio,
-      phone: data.telefono,
+      address: data.domicilio || "", // <--- ARREGLADO
+      phone: data.telefono || "",   // <--- ARREGLADO
     };
   }
 
@@ -362,6 +362,47 @@ const transformFormDataToUpdatePayload = (data) => {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // --- INICIO DE VALIDACIÓN (ESTO ARREGLA TODO) ---
+    if (action === "crear" && isNewCustomer) {
+      if (
+        !formData.dni ||
+        !formData.cliente ||
+        !formData.domicilio ||
+        !formData.telefono
+      ) {
+        addNotification("Para un cliente nuevo, todos los campos de cliente son obligatorios.", "warning");
+        return; // Detiene el envío
+      }
+      if (formData.dni.length < 7) {
+          addNotification("El DNI debe tener al menos 7 u 8 dígitos.", "warning");
+        return; // Detiene el envío
+      }
+    }
+
+    // Validar Lentes: si se selecciona un tipo, los campos deben estar llenos
+    const checkLens = (eye) => {
+      const type = formData[`tipo_lente_${eye}`]; // ej: "lejos"
+      if (!type) return true; // Si no hay tipo, es válido.
+      
+      // Si hay un tipo, verifica que los 3 campos existan
+      const esf = formData[`${type}_${eye}_esf`];
+      const cil = formData[`${type}_${eye}_cil`];
+      const eje = formData[`${type}_${eye}_eje`];
+
+      if (!esf || !cil || !eje) {
+        // Usa 'toUpperCase' para "OD" o "OI"
+        addNotification(`Faltan datos (esf, cil, eje) para el lente ${type} del Ojo ${eye.toUpperCase()}.`, "warning");
+        return false;
+      }
+      return true;
+    };
+
+    if (!checkLens('od') || !checkLens('oi')) {
+      return; // Detiene el envío si la validación de Ojo Derecho o Izquierdo falla
+    }
+    // --- FIN DE LA VALIDACIÓN ---
+
     setLoading(true);
     setError(null);
 
@@ -371,15 +412,10 @@ const transformFormDataToUpdatePayload = (data) => {
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
-        // Usamos la nueva función de transformación
+        // (Tu lógica de editar que ya arreglamos)
         const payload = transformFormDataToUpdatePayload(formData); 
-
-        // Obtenemos el número de sobre (que está en la URL o en los datos)
         const sobreId = formData.numero_sobre || id; 
-
-        // Llamamos al servicio 'updateSobre' arreglado (Paso 2.1)
         await updateSobre(sobreId, payload); 
-
         addNotification("Sobre actualizado exitosamente", "success");
       } else if (action === "eliminar") {
         await deleteSobre({
@@ -388,10 +424,10 @@ const transformFormDataToUpdatePayload = (data) => {
         });
         addNotification("Sobre eliminado exitosamente", "success");
       }
-      navigate("/"); // Redirige a la página principal tras una operación exitosa
+      navigate("/"); 
     } catch (err) {
       setError(err.message);
-      addNotification(`Error: ${err.message}`, "error"); // Muestra el error al usuario
+      addNotification(`Error: ${err.message}`, "error"); 
     } finally {
       setLoading(false);
     }
