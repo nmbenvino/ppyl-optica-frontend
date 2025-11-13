@@ -178,7 +178,7 @@ const SobrePage = () => {
                   name="dni"
                   value={formData.dni || ""}
                   onChange={handleCustomerSelect}
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || action === "editar"}
                   options={customerOptions}
                 />
               </div>
@@ -189,7 +189,7 @@ const SobrePage = () => {
             label="DNI"
             type="number"
             name="dni"
-            disabled={isFormDisabled}
+            disabled={isFormDisabled || action === "editar"}
             onChange={handleChange}
             value={formData.dni || ""}
           />
@@ -197,7 +197,7 @@ const SobrePage = () => {
             label="Cliente"
             type="text"
             name="cliente"
-            disabled={isFormDisabled}
+            disabled={isFormDisabled || action === "editar"}
             onChange={handleChange}
             value={formData.cliente || ""}
           />
@@ -205,7 +205,7 @@ const SobrePage = () => {
             label="Domicilio"
             type="text"
             name="domicilio"
-            disabled={isFormDisabled}
+            disabled={isFormDisabled || action === "editar"}
             onChange={handleChange}
             value={formData.domicilio || ""}
           />

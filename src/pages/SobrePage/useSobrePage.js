@@ -301,6 +301,62 @@ export const useSobrePage = (action, id) => {
   };
 
   /**
+ * Transforma los datos del formulario al payload que espera PATCH /update_sobre
+ * (SobreUpdatePayload)
+ * @param {object} data - El estado `formData`
+ * @returns {object} El payload para actualizar.
+ */
+const transformFormDataToUpdatePayload = (data) => {
+  const lenss = [];
+  const lensTypeOD = data.tipo_lente_od;
+  const lensTypeOI = data.tipo_lente_oi;
+
+  // Añadir lente OD si se ha seleccionado un tipo
+  if (lensTypeOD) {
+    lenss.push({
+      lens: "od", // Campo identificador ('od' o 'oi')
+      type: lensTypeOD,
+      esf: Number(data[`${lensTypeOD}_od_esf`]) || 0,
+      cil: Number(data[`${lensTypeOD}_od_cil`]) || 0,
+      eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
+    });
+  }
+
+  // Añadir lente OI si se ha seleccionado un tipo
+  if (lensTypeOI) {
+    lenss.push({
+      lens: "oi", // Campo identificador ('od' o 'oi')
+      type: lensTypeOI,
+      esf: Number(data[`${lensTypeOI}_oi_esf`]) || 0,
+      cil: Number(data[`${lensTypeOI}_oi_cil`]) || 0,
+      eje: Number(data[`${lensTypeOI}_oi_eje`]) || 0,
+    });
+  }
+
+  // Este payload SÍ coincide con lo que el backend espera para editar
+    const payload = {
+      sobre: {
+        social_work: data.obra_social,
+        billing: data.facturacion,
+        recipe: data.receta_doctor,
+        observations: data.observaciones,
+        total: Number(data.total) || 0,
+        advance_payment: Number(data.sena) || 0,
+        sobre_date: data.fecha,
+      },
+      glasses: {
+        color: data.color,
+        frame: data.armazon,
+        organic: data.organico,
+        mineral: data.mineral,
+        lenss: lenss,
+      },
+    };
+    return payload;
+  };
+
+
+  /**
    * Manejador para el envío del formulario.
    * @param {React.FormEvent<HTMLFormElement>} e - El evento del formulario.
    */
@@ -315,8 +371,15 @@ export const useSobrePage = (action, id) => {
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
-        const payload = transformFormDataToApiPayload(formData);
-        await updateSobre(payload);
+        // Usamos la nueva función de transformación
+        const payload = transformFormDataToUpdatePayload(formData); 
+
+        // Obtenemos el número de sobre (que está en la URL o en los datos)
+        const sobreId = formData.numero_sobre || id; 
+
+        // Llamamos al servicio 'updateSobre' arreglado (Paso 2.1)
+        await updateSobre(sobreId, payload); 
+
         addNotification("Sobre actualizado exitosamente", "success");
       } else if (action === "eliminar") {
         await deleteSobre({
