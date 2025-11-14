@@ -212,7 +212,7 @@ export const useSobrePage = (action, id) => {
     } else {
       // Si se deselecciona, se limpian los campos
       handleChange(e); // Deja que el handleChange genérico limpie el DNI
-      handleNewCustomerToggle({ target: { checked: false } }); // Llama a la lógica de limpieza
+      handleNewCustomerToggle({ target: { checked: false } }); //lógica de limpieza
     }
   };
 
@@ -274,8 +274,8 @@ export const useSobrePage = (action, id) => {
       customer_name: data.cliente?.split(" ")[0] || "",
       last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
       dni: Number(data.dni) || 0,
-      address: data.domicilio || "", // <--- ARREGLADO
-      phone: data.telefono || "",   // <--- ARREGLADO
+      address: data.domicilio || "", 
+      phone: data.telefono || "",   
     };
   }
 
@@ -288,11 +288,11 @@ export const useSobrePage = (action, id) => {
   // CASO 3: Cliente existente con cambios
   else if (isCustomerModified) {
     payload.edit = true;
-    payload.dni = Number(originalDni); // 👈 el DNI original (viejo)
+    payload.dni = Number(originalDni);
     payload.customer = {
       customer_name: data.cliente?.split(" ")[0] || "",
       last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-      dni: Number(data.dni) || 0, // 👈 el nuevo (si cambió)
+      dni: Number(data.dni) || 0, 
       address: data.domicilio,
       phone: data.telefono,
     };
