@@ -98,11 +98,12 @@ export const deleteSobre = ({ dni, sobre_number }) => {
 /**
  * Actualiza un sobre existente.
  * Corresponde al endpoint `/update_sobre`.
- * @param {Object} data - Los datos a actualizar. El `sobre_number` es obligatorio para identificar el sobre.
+ * @param {number} sobre_number - El número del sobre a actualizar. //Cambio
+ * @param {Object} data - Los datos a actualizar.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
-export const updateSobre = (data) => {
-  return apiFetch("/sobre/update_sobre", {
+export const updateSobre = (sobre_number, data) => {
+  return apiFetch(`/sobre/update_sobre/${sobre_number}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });

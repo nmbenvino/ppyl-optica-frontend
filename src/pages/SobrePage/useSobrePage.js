@@ -212,7 +212,7 @@ export const useSobrePage = (action, id) => {
     } else {
       // Si se deselecciona, se limpian los campos
       handleChange(e); // Deja que el handleChange genérico limpie el DNI
-      handleNewCustomerToggle({ target: { checked: false } }); // Llama a la lógica de limpieza
+      handleNewCustomerToggle({ target: { checked: false } }); //lógica de limpieza
     }
   };
 
@@ -267,15 +267,15 @@ export const useSobrePage = (action, id) => {
         lenss: lenss,
       },
     };
-   // CASO 1: Cliente nuevo
+// CASO 1: Cliente nuevo
   if (isNewCustomer) {
     payload.edit = false;
     payload.customer = {
       customer_name: data.cliente?.split(" ")[0] || "",
       last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
       dni: Number(data.dni) || 0,
-      address: data.domicilio,
-      phone: data.telefono,
+      address: data.domicilio || "", 
+      phone: data.telefono || "",   
     };
   }
 
@@ -288,11 +288,11 @@ export const useSobrePage = (action, id) => {
   // CASO 3: Cliente existente con cambios
   else if (isCustomerModified) {
     payload.edit = true;
-    payload.dni = Number(originalDni); // 👈 el DNI original (viejo)
+    payload.dni = Number(originalDni);
     payload.customer = {
       customer_name: data.cliente?.split(" ")[0] || "",
       last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-      dni: Number(data.dni) || 0, // 👈 el nuevo (si cambió)
+      dni: Number(data.dni) || 0, 
       address: data.domicilio,
       phone: data.telefono,
     };
@@ -301,11 +301,108 @@ export const useSobrePage = (action, id) => {
   };
 
   /**
+ * Transforma los datos del formulario al payload que espera PATCH /update_sobre
+ * (SobreUpdatePayload)
+ * @param {object} data - El estado `formData`
+ * @returns {object} El payload para actualizar.
+ */
+const transformFormDataToUpdatePayload = (data) => {
+  const lenss = [];
+  const lensTypeOD = data.tipo_lente_od;
+  const lensTypeOI = data.tipo_lente_oi;
+
+  // Añadir lente OD si se ha seleccionado un tipo
+  if (lensTypeOD) {
+    lenss.push({
+      lens: "od", // Campo identificador ('od' o 'oi')
+      type: lensTypeOD,
+      esf: Number(data[`${lensTypeOD}_od_esf`]) || 0,
+      cil: Number(data[`${lensTypeOD}_od_cil`]) || 0,
+      eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
+    });
+  }
+
+  // Añadir lente OI si se ha seleccionado un tipo
+  if (lensTypeOI) {
+    lenss.push({
+      lens: "oi", // Campo identificador ('od' o 'oi')
+      type: lensTypeOI,
+      esf: Number(data[`${lensTypeOI}_oi_esf`]) || 0,
+      cil: Number(data[`${lensTypeOI}_oi_cil`]) || 0,
+      eje: Number(data[`${lensTypeOI}_oi_eje`]) || 0,
+    });
+  }
+
+  // Este payload SÍ coincide con lo que el backend espera para editar
+    const payload = {
+      sobre: {
+        social_work: data.obra_social,
+        billing: data.facturacion,
+        recipe: data.receta_doctor,
+        observations: data.observaciones,
+        total: Number(data.total) || 0,
+        advance_payment: Number(data.sena) || 0,
+        sobre_date: data.fecha,
+      },
+      glasses: {
+        color: data.color,
+        frame: data.armazon,
+        organic: data.organico,
+        mineral: data.mineral,
+        lenss: lenss,
+      },
+    };
+    return payload;
+  };
+
+
+  /**
    * Manejador para el envío del formulario.
    * @param {React.FormEvent<HTMLFormElement>} e - El evento del formulario.
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // --- INICIO DE VALIDACIÓN (ESTO ARREGLA TODO) ---
+    if (action === "crear" && isNewCustomer) {
+      if (
+        !formData.dni ||
+        !formData.cliente ||
+        !formData.domicilio ||
+        !formData.telefono
+      ) {
+        addNotification("Para un cliente nuevo, todos los campos de cliente son obligatorios.", "warning");
+        return; // Detiene el envío
+      }
+      if (formData.dni.length < 7) {
+          addNotification("El DNI debe tener al menos 7 u 8 dígitos.", "warning");
+        return; // Detiene el envío
+      }
+    }
+
+    // Validar Lentes: si se selecciona un tipo, los campos deben estar llenos
+    const checkLens = (eye) => {
+      const type = formData[`tipo_lente_${eye}`]; // ej: "lejos"
+      if (!type) return true; // Si no hay tipo, es válido.
+      
+      // Si hay un tipo, verifica que los 3 campos existan
+      const esf = formData[`${type}_${eye}_esf`];
+      const cil = formData[`${type}_${eye}_cil`];
+      const eje = formData[`${type}_${eye}_eje`];
+
+      if (!esf || !cil || !eje) {
+        // Usa 'toUpperCase' para "OD" o "OI"
+        addNotification(`Faltan datos (esf, cil, eje) para el lente ${type} del Ojo ${eye.toUpperCase()}.`, "warning");
+        return false;
+      }
+      return true;
+    };
+
+    if (!checkLens('od') || !checkLens('oi')) {
+      return; // Detiene el envío si la validación de Ojo Derecho o Izquierdo falla
+    }
+    // --- FIN DE LA VALIDACIÓN ---
+
     setLoading(true);
     setError(null);
 
@@ -315,8 +412,10 @@ export const useSobrePage = (action, id) => {
         await addSobre(payload);
         addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
-        const payload = transformFormDataToApiPayload(formData);
-        await updateSobre(payload);
+        // (Tu lógica de editar que ya arreglamos)
+        const payload = transformFormDataToUpdatePayload(formData); 
+        const sobreId = formData.numero_sobre || id; 
+        await updateSobre(sobreId, payload); 
         addNotification("Sobre actualizado exitosamente", "success");
       } else if (action === "eliminar") {
         await deleteSobre({
@@ -325,10 +424,10 @@ export const useSobrePage = (action, id) => {
         });
         addNotification("Sobre eliminado exitosamente", "success");
       }
-      navigate("/"); // Redirige a la página principal tras una operación exitosa
+      navigate("/"); 
     } catch (err) {
       setError(err.message);
-      addNotification(`Error: ${err.message}`, "error"); // Muestra el error al usuario
+      addNotification(`Error: ${err.message}`, "error"); 
     } finally {
       setLoading(false);
     }
