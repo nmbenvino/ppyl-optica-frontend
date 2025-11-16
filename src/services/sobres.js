@@ -1,10 +1,4 @@
-/**
- * Este archivo contiene todos los servicios para interactuar con la API de sobres.
- */
-import { handleMockRequest } from "@services/_mockData.js";
-
 const API_BASE_URL = "http://localhost:8000";
-const USE_MOCK_DATA = false; // Cambiar a false para usar la API real
 
 /**
  * Realiza una petición fetch y maneja la respuesta y los errores.
@@ -14,11 +8,6 @@ const USE_MOCK_DATA = false; // Cambiar a false para usar la API real
  * @throws {Error} Si la respuesta de la red no es 'ok'.
  */
 const apiFetch = async (endpoint, options = {}) => {
-  // --- Simulación con mock data ---
-  if (USE_MOCK_DATA) {
-    return handleMockRequest(endpoint);
-  }
-
   const url = `${API_BASE_URL}${endpoint}`;
 
   const defaultOptions = {
@@ -54,12 +43,11 @@ const apiFetch = async (endpoint, options = {}) => {
  * @param {string|null} filters.date_fin - Fecha de fin (opcional, YYYY-MM-DD).
  * @returns {Promise<{data: Sobre[]}>} La lista de sobres.
  */
-export const getSobres = ({ dni = null, date_ini = null, date_fin = null, id_sobre = null }) => {
+export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
   const params = new URLSearchParams();
   if (dni) params.append("dni", dni);
   if (date_ini) params.append("fecha_ini", date_ini);
   if (date_fin) params.append("fecha_fin", date_fin);
-  if (id_sobre) params.append("id_sobre", id_sobre);
 
   const queryString = params.toString();
   return apiFetch(`/sobre/getSobre${queryString ? `?${queryString}` : ""}`, {
