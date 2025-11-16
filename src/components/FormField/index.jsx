@@ -18,13 +18,14 @@ const FormField = ({
   disabled,
   options,
   value,
+  containerClassName,
   ...props
 }) => {
   return (
     <fieldset
       className={`${formFieldStyles.fieldSet} ${
         disabled ? formFieldStyles.disabled : ""
-      }`}
+      } ${containerClassName || ""}`}
     >
       <legend className={formFieldStyles.legend}>{label}</legend>
       {type === "textarea" ? (

@@ -13,6 +13,7 @@
 export const homePageStyles = {
   container:
     "bg-gray-100 w-full min-h-screen text-gray-900 dark:bg-gray-900 dark:text-white p-4 md:p-8",
+  error: "align-center text-4xl font-bold",
   header: "flex justify-between items-center mb-6",
   title: "text-3xl font-bold",
   actionsContainer: "flex gap-2",

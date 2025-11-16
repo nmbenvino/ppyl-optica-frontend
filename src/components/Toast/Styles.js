@@ -1,5 +1,5 @@
 export const toastContainerStyle =
-  "fixed bottom-5 left-5 z-[1000] flex flex-col gap-2.5";
+  "fixed top-2 left-1/2 -translate-x-1/2 z-[1000] flex flex-col gap-2.5";
 
 export const toastBaseStyle =
   "flex items-center py-3 px-4 rounded-lg shadow-lg min-w-[300px] max-w-md text-white animate-slide-in-right";

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getSobres } from "@services/sobres.js";
+import { useNotification } from "@components/Notification/useNotification.js";
 
 /**
  * Hook personalizado para manejar la lógica y el estado de la HomePage.
@@ -41,6 +42,7 @@ export const useHomePage = () => {
     ),
     date_fin: getLocalDate(new Date()),
   });
+  const { addNotification } = useNotification();
 
   useEffect(() => {
     const fetchSobres = async () => {
@@ -55,6 +57,7 @@ export const useHomePage = () => {
         setSobres(response.data); // La respuesta ahora tiene una propiedad "data"
       } catch (err) {
         setError(err.message);
+        addNotification(`Error al cargar sobres: ${err.message}`, "error");
       } finally {
         setLoading(false);
       }
@@ -107,6 +110,7 @@ export const useHomePage = () => {
       setSobres(response.data);
     } catch (err) {
       setError(err.message);
+      addNotification(`Error en la búsqueda: ${err.message}`, "error");
       setSobres([]); // Limpia los sobres en caso de error
     } finally {
       setLoading(false);

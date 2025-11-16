@@ -4,6 +4,7 @@ import { sobresTableStyles } from "./Styles";
  * Componente que renderiza la tabla de sobres.
  * @param {object} props - Propiedades del componente.
  * @param {boolean} props.loading - Indica si los datos se están cargando.
+ * @param {string|null} props.error - El mensaje de error, si existe.
  * @param {Array} props.sobres - El array de sobres a mostrar.
  * @param {object} props.selectedSobre - El sobre actualmente seleccionado.
  * @param {Function} props.handleSelectSobre - Función para manejar la selección de un sobre.
@@ -12,6 +13,7 @@ import { sobresTableStyles } from "./Styles";
  */
 const SobresTable = ({
   loading,
+  error,
   sobres,
   selectedSobre,
   handleSelectSobre,
@@ -32,6 +34,12 @@ const SobresTable = ({
           <tr>
             <td colSpan="4" className={sobresTableStyles.tableMessage}>
               Cargando...
+            </td>
+          </tr>
+        ) : error ? (
+          <tr>
+            <td colSpan="4" className={sobresTableStyles.tableMessageError}>
+              Error al cargar los datos: {error}
             </td>
           </tr>
         ) : sobres.length === 0 ? (

@@ -22,10 +22,6 @@ const HomePage = () => {
     handleSearch,
   } = useHomePage();
 
-  if (error) {
-    return <p className={homePageStyles.container}>Error: {error}</p>;
-  }
-
   const isActionDisabled = !selectedSobre.id;
   const getLocalDate = (date) => {
     const offset = date.getTimezoneOffset();
@@ -121,7 +117,6 @@ const HomePage = () => {
           placeholder="Buscar por DNI..."
           value={filters.dni}
           onChange={handleFilterChange}
-          containerClassName={homePageStyles.filterGroup}
         />
         <FormField
           label="Fecha Desde"
@@ -130,7 +125,6 @@ const HomePage = () => {
           value={filters.date_ini}
           onChange={handleFilterChange}
           max={today}
-          containerClassName={homePageStyles.filterGroup}
         />
         <FormField
           label="Fecha Hasta"
@@ -139,9 +133,12 @@ const HomePage = () => {
           value={filters.date_fin}
           onChange={handleFilterChange}
           max={today}
-          containerClassName={homePageStyles.filterGroup}
         />
-        <Button onClick={handleSearch} variant="primary" disabled={isSearchDisabled()}>
+        <Button
+          onClick={handleSearch}
+          variant="primary"
+          disabled={isSearchDisabled()}
+        >
           Buscar
         </Button>
       </div>
@@ -153,6 +150,7 @@ const HomePage = () => {
         selectedSobre={selectedSobre}
         handleSelectSobre={handleSelectSobre}
         formatDateToDDMMYYYY={formatDateToDDMMYYYY}
+        error={error}
       />
     </div>
   );

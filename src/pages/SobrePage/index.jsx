@@ -81,16 +81,6 @@ const SobrePage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div
-        className={`${sobrePageStyles.container} ${sobrePageStyles.errorText}`}
-      >
-        Error: {error}
-      </div>
-    );
-  }
-
   return (
     <div className={sobrePageStyles.container}>
       {/* --- Header Fijo --- */}
@@ -148,7 +138,7 @@ const SobrePage = () => {
           {/* Fila 2: Fecha y N° Sobre */}
           <div className={generalInfoStyles.dateFieldContainer}>
             <FormField
-              label="Fecha"
+              label="Fecha (*)"
               type="date"
               name="fecha"
               disabled={isFormDisabled}
@@ -173,7 +163,7 @@ const SobrePage = () => {
             <>
               <div className={generalInfoStyles.dniSearchFieldContainer}>
                 <FormField
-                  label="Buscar por DNI"
+                  label="Buscar por DNI (*)"
                   type="select"
                   name="dni"
                   value={formData.dni || ""}
@@ -186,7 +176,7 @@ const SobrePage = () => {
             </>
           )}
           <FormField
-            label="DNI"
+            label="DNI (*)"
             type="number"
             name="dni"
             disabled={isFormDisabled || action === "editar"}
@@ -194,7 +184,7 @@ const SobrePage = () => {
             value={formData.dni || ""}
           />
           <FormField
-            label="Cliente"
+            label="Cliente (*)"
             type="text"
             name="cliente"
             disabled={isFormDisabled || action === "editar"}
@@ -202,7 +192,7 @@ const SobrePage = () => {
             value={formData.cliente || ""}
           />
           <FormField
-            label="Domicilio"
+            label="Domicilio (*)"
             type="text"
             name="domicilio"
             disabled={isFormDisabled || action === "editar"}
@@ -210,7 +200,7 @@ const SobrePage = () => {
             value={formData.domicilio || ""}
           />
           <FormField
-            label="Teléfono"
+            label="Teléfono (*)"
             type="text"
             name="telefono"
             disabled={isFormDisabled || action === "editar"}
@@ -244,7 +234,7 @@ const SobrePage = () => {
                 label="Orgánico"
                 type="text"
                 name="organico"
-                disabled={isFormDisabled}
+                disabled={isFormDisabled || !!formData.mineral}
                 onChange={handleChange}
                 value={formData.organico || ""}
               />
@@ -252,7 +242,7 @@ const SobrePage = () => {
                 label="Mineral"
                 type="text"
                 name="mineral"
-                disabled={isFormDisabled}
+                disabled={isFormDisabled || !!formData.organico}
                 onChange={handleChange}
                 value={formData.mineral || ""}
               />
@@ -335,7 +325,7 @@ const SobrePage = () => {
           gridClassName={paymentDetailsStyles.grid}
         >
           <FormField
-            label="Total"
+            label="Total (*)"
             type="number"
             name="total"
             disabled={isFormDisabled}
