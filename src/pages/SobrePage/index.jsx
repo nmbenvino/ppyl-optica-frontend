@@ -345,7 +345,7 @@ const SobrePage = () => {
             type="number"
             name="a_pagar"
             disabled={true}
-            value={(Number(formData.total) || 0) - (Number(formData.sena) || 0)}
+            value={Math.max(0,(Number(formData.total) || 0) - (Number(formData.sena) || 0))}
           />
         </FormSection>
       </form>
