@@ -20,4 +20,6 @@ export const sobresTableStyles = {
     "border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer",
   tableCell: "p-4",
   tableMessage: "p-4 text-center text-gray-500 dark:text-gray-400",
+  tableMessageError:
+    "p-4 text-2xl font-bold text-center text-red-500 dark:text-red-400",
 };
