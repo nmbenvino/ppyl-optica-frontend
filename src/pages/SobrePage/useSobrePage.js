@@ -188,12 +188,12 @@ export const useSobrePage = (action, id) => {
     });
 
     // Nuevo: si el usuario cambia datos del cliente existente, marcarlo como modificado
-    if (
-      !isNewCustomer &&
-      ["cliente", "domicilio", "telefono", "dni"].includes(name)
-    ) {
-      setIsCustomerModified(true);
-    }
+  if (
+    !isNewCustomer &&
+    ["cliente", "domicilio", "telefono", "dni", "tipo_lente_od", "tipo_lente_oi"].includes(name)
+      ) {
+        setIsCustomerModified(true);
+        }
   };
 
   /**
@@ -468,6 +468,11 @@ export const useSobrePage = (action, id) => {
     if (!formData.total) {
       addNotification("Se debe definir un monto total.", "warning");
       return;
+    }
+    //nueva validacion
+    if (Number(formData.sena) > Number(formData.total)) {
+      addNotification("La seña no puede ser mayor que el total.", "warning");
+    return;
     }
     // --- FIN DE LA VALIDACIÓN ---
 
