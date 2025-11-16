@@ -47,8 +47,6 @@ export const useSobrePage = (action, id) => {
   const location = useLocation();
   const [originalDni, setOriginalDni] = useState(null);
   const sobreDesdeEstado = location.state?.sobre; // Accede al sobre enviado desde HomePage
-  console.log(location)
-  console.log ("Sobre desde estado:", sobreDesdeEstado);
   const { addNotification } = useNotification();
   const [customers, setCustomers] = useState([]);
 
@@ -135,6 +133,10 @@ export const useSobrePage = (action, id) => {
         }
       } catch (err) {
         setError(err.message);
+        addNotification(
+          `Error al cargar datos iniciales: ${err.message}`,
+          "error"
+        );
       } finally {
         setLoading(false);
       }
@@ -155,17 +157,43 @@ export const useSobrePage = (action, id) => {
       return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData((prev) => {
+      let newState = { ...prev };
+
+      // --- INICIO DE LA CORRECCIÓN ---
+
+      if (type === "radio") {
+        // Si se hace clic en un radio button que ya estaba seleccionado, deseleccionarlo.
+        if (prev[name] === value) {
+          newState[name] = null; // Deselecciona
+        } else {
+          // Si se selecciona un nuevo radio, primero limpiar los campos del anterior (si existía).
+          if (prev[name]) {
+            const eye = name.split("_")[2]; // 'od' u 'oi'
+            const oldType = prev[name]; // El tipo que estaba seleccionado antes
+            delete newState[`${oldType}_${eye}_esf`];
+            delete newState[`${oldType}_${eye}_cil`];
+            delete newState[`${oldType}_${eye}_eje`];
+          }
+          newState[name] = value; // Selecciona el nuevo
+        }
+      } else {
+        // Para cualquier otro tipo de input (text, checkbox, etc.)
+        newState[name] = type === "checkbox" ? checked : value;
+      }
+
+      // --- FIN DE LA CORRECCIÓN ---
+
+      return newState;
+    });
+
     // Nuevo: si el usuario cambia datos del cliente existente, marcarlo como modificado
-  if (
-    !isNewCustomer &&
-    ["cliente", "domicilio", "telefono", "dni"].includes(name)
-  ) {
-    setIsCustomerModified(true);
-  }
+    if (
+      !isNewCustomer &&
+      ["cliente", "domicilio", "telefono", "dni"].includes(name)
+    ) {
+      setIsCustomerModified(true);
+    }
   };
 
   /**
@@ -222,31 +250,37 @@ export const useSobrePage = (action, id) => {
    * @returns {object} El payload listo para ser enviado a la API.
    */
   const transformFormDataToApiPayload = (data) => {
-    const lenss = [];
     const lensTypeOD = data.tipo_lente_od;
     const lensTypeOI = data.tipo_lente_oi;
+    let lensOD = null;
+    let lensOI = null;
+    const lenss = [];
 
     // Añadir lente OD si se ha seleccionado un tipo
     if (lensTypeOD) {
-      lenss.push({
+      lensOD = {
         type: lensTypeOD,
         lens: "od",
         esf: Number(data[`${lensTypeOD}_od_esf`]) || 0,
         cil: Number(data[`${lensTypeOD}_od_cil`]) || 0,
         eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
-      });
+      };
     }
 
     // Añadir lente OI si se ha seleccionado un tipo
     if (lensTypeOI) {
-      lenss.push({
+      lensOI = {
         type: lensTypeOI,
         lens: "oi",
         esf: Number(data[`${lensTypeOI}_oi_esf`]) || 0,
         cil: Number(data[`${lensTypeOI}_oi_cil`]) || 0,
         eje: Number(data[`${lensTypeOI}_oi_eje`]) || 0,
-      });
+      };
     }
+
+    // Se añaden los lentes al array solo si no son nulos
+    if (lensOD) lenss.push(lensOD);
+    if (lensOI) lenss.push(lensOI);
 
     // Estructura para /add_sobre y /update_sobre
     const payload = {
@@ -267,73 +301,79 @@ export const useSobrePage = (action, id) => {
         lenss: lenss,
       },
     };
-// CASO 1: Cliente nuevo
-  if (isNewCustomer) {
-    payload.edit = false;
-    payload.customer = {
-      customer_name: data.cliente?.split(" ")[0] || "",
-      last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-      dni: Number(data.dni) || 0,
-      address: data.domicilio || "", 
-      phone: data.telefono || "",   
-    };
-  }
+    // CASO 1: Cliente nuevo
+    if (isNewCustomer) {
+      payload.edit = false;
+      payload.customer = {
+        customer_name: data.cliente?.split(" ")[0] || "",
+        last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
+        dni: Number(data.dni) || 0,
+        address: data.domicilio || "",
+        phone: data.telefono || "",
+      };
+    }
 
-  // CASO 2: Cliente existente sin cambios
-  else if (!isCustomerModified) {
-    payload.edit = false;
-    payload.dni = Number(data.dni);
-  }
+    // CASO 2: Cliente existente sin cambios
+    else if (!isCustomerModified) {
+      payload.edit = false;
+      payload.dni = Number(data.dni);
+    }
 
-  // CASO 3: Cliente existente con cambios
-  else if (isCustomerModified) {
-    payload.edit = true;
-    payload.dni = Number(originalDni);
-    payload.customer = {
-      customer_name: data.cliente?.split(" ")[0] || "",
-      last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
-      dni: Number(data.dni) || 0, 
-      address: data.domicilio,
-      phone: data.telefono,
-    };
-  }
+    // CASO 3: Cliente existente con cambios
+    else if (isCustomerModified) {
+      payload.edit = true;
+      payload.dni = Number(originalDni);
+      payload.customer = {
+        customer_name: data.cliente?.split(" ")[0] || "",
+        last_name: data.cliente?.split(" ").slice(1).join(" ") || "",
+        dni: Number(data.dni) || 0,
+        address: data.domicilio,
+        phone: data.telefono,
+      };
+    }
     return payload;
   };
 
   /**
- * Transforma los datos del formulario al payload que espera PATCH /update_sobre
- * (SobreUpdatePayload)
- * @param {object} data - El estado `formData`
- * @returns {object} El payload para actualizar.
- */
-const transformFormDataToUpdatePayload = (data) => {
-  const lenss = [];
-  const lensTypeOD = data.tipo_lente_od;
-  const lensTypeOI = data.tipo_lente_oi;
+   * Transforma los datos del formulario al payload que espera PATCH /update_sobre
+   * (SobreUpdatePayload)
+   * @param {object} data - El estado `formData`
+   * @returns {object} El payload para actualizar.
+   */
+  const transformFormDataToUpdatePayload = (data) => {
+    const lensTypeOD = data.tipo_lente_od;
+    const lensTypeOI = data.tipo_lente_oi;
+    let lensOD = null;
+    let lensOI = null;
+    const lenss = [];
 
-  // Añadir lente OD si se ha seleccionado un tipo
-  if (lensTypeOD) {
-    lenss.push({
-      lens: "od", // Campo identificador ('od' o 'oi')
-      type: lensTypeOD,
-      esf: Number(data[`${lensTypeOD}_od_esf`]) || 0,
-      cil: Number(data[`${lensTypeOD}_od_cil`]) || 0,
-      eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
-    });
-  }
+    // Añadir lente OD si se ha seleccionado un tipo
+    if (lensTypeOD) {
+      lensOD = {
+        lens: "od", // Campo identificador ('od' o 'oi')
+        type: lensTypeOD,
+        esf: Number(data[`${lensTypeOD}_od_esf`]) || 0,
+        cil: Number(data[`${lensTypeOD}_od_cil`]) || 0,
+        eje: Number(data[`${lensTypeOD}_od_eje`]) || 0,
+      };
+    }
 
-  // Añadir lente OI si se ha seleccionado un tipo
-  if (lensTypeOI) {
-    lenss.push({
-      lens: "oi", // Campo identificador ('od' o 'oi')
-      type: lensTypeOI,
-      esf: Number(data[`${lensTypeOI}_oi_esf`]) || 0,
-      cil: Number(data[`${lensTypeOI}_oi_cil`]) || 0,
-      eje: Number(data[`${lensTypeOI}_oi_eje`]) || 0,
-    });
-  }
+    // Añadir lente OI si se ha seleccionado un tipo
+    if (lensTypeOI) {
+      lensOI = {
+        lens: "oi", // Campo identificador ('od' o 'oi')
+        type: lensTypeOI,
+        esf: Number(data[`${lensTypeOI}_oi_esf`]) || 0,
+        cil: Number(data[`${lensTypeOI}_oi_cil`]) || 0,
+        eje: Number(data[`${lensTypeOI}_oi_eje`]) || 0,
+      };
+    }
 
-  // Este payload SÍ coincide con lo que el backend espera para editar
+    // Se añaden los lentes al array solo si no son nulos
+    if (lensOD) lenss.push(lensOD);
+    if (lensOI) lenss.push(lensOI);
+
+    // Este payload SÍ coincide con lo que el backend espera para editar
     const payload = {
       sobre: {
         social_work: data.obra_social,
@@ -355,7 +395,6 @@ const transformFormDataToUpdatePayload = (data) => {
     return payload;
   };
 
-
   /**
    * Manejador para el envío del formulario.
    * @param {React.FormEvent<HTMLFormElement>} e - El evento del formulario.
@@ -364,19 +403,28 @@ const transformFormDataToUpdatePayload = (data) => {
     e.preventDefault();
 
     // --- INICIO DE VALIDACIÓN (ESTO ARREGLA TODO) ---
-    if (action === "crear" && isNewCustomer) {
+    if (action === "crear") {
       if (
         !formData.dni ||
         !formData.cliente ||
         !formData.domicilio ||
         !formData.telefono
       ) {
-        addNotification("Para un cliente nuevo, todos los campos de cliente son obligatorios.", "warning");
+        addNotification(
+          "Todos los campos de cliente son obligatorios.",
+          "warning"
+        );
         return; // Detiene el envío
       }
       if (formData.dni.length < 7) {
-          addNotification("El DNI debe tener al menos 7 u 8 dígitos.", "warning");
+        addNotification("El DNI debe tener al menos 7 u 8 dígitos.", "warning");
         return; // Detiene el envío
+      }
+    } else {
+      // Validaciones para cliente existente
+      if (!formData.dni) {
+        addNotification("Debes seleccionar un cliente existente.", "warning");
+        return;
       }
     }
 
@@ -384,22 +432,42 @@ const transformFormDataToUpdatePayload = (data) => {
     const checkLens = (eye) => {
       const type = formData[`tipo_lente_${eye}`]; // ej: "lejos"
       if (!type) return true; // Si no hay tipo, es válido.
-      
+
       // Si hay un tipo, verifica que los 3 campos existan
       const esf = formData[`${type}_${eye}_esf`];
       const cil = formData[`${type}_${eye}_cil`];
       const eje = formData[`${type}_${eye}_eje`];
 
-      if (!esf || !cil || !eje) {
+      // Verifica que los campos no sean nulos, indefinidos o strings vacíos.
+      const areFieldsPresent = esf != null && cil != null && eje != null;
+
+      if (!areFieldsPresent || esf === "" || cil === "" || eje === "") {
         // Usa 'toUpperCase' para "OD" o "OI"
-        addNotification(`Faltan datos (esf, cil, eje) para el lente ${type} del Ojo ${eye.toUpperCase()}.`, "warning");
+        addNotification(
+          `Faltan datos (esf, cil, eje) para el lente ${type} del Ojo ${eye.toUpperCase()}.`,
+          "warning"
+        );
         return false;
       }
       return true;
     };
 
-    if (!checkLens('od') || !checkLens('oi')) {
+    // Nueva validación: al menos un lente debe estar seleccionado
+    if (!formData.tipo_lente_od && !formData.tipo_lente_oi) {
+      addNotification(
+        "Debes definir la graduación para al menos un ojo.",
+        "warning"
+      );
+      return;
+    }
+
+    if (!checkLens("od") || !checkLens("oi")) {
       return; // Detiene el envío si la validación de Ojo Derecho o Izquierdo falla
+    }
+
+    if (!formData.total) {
+      addNotification("Se debe definir un monto total.", "warning");
+      return;
     }
     // --- FIN DE LA VALIDACIÓN ---
 
@@ -413,9 +481,9 @@ const transformFormDataToUpdatePayload = (data) => {
         addNotification("Sobre creado exitosamente", "success");
       } else if (action === "editar") {
         // (Tu lógica de editar que ya arreglamos)
-        const payload = transformFormDataToUpdatePayload(formData); 
-        const sobreId = formData.numero_sobre || id; 
-        await updateSobre(sobreId, payload); 
+        const payload = transformFormDataToUpdatePayload(formData);
+        const sobreId = formData.numero_sobre || id;
+        await updateSobre(sobreId, payload);
         addNotification("Sobre actualizado exitosamente", "success");
       } else if (action === "eliminar") {
         await deleteSobre({
@@ -424,10 +492,10 @@ const transformFormDataToUpdatePayload = (data) => {
         });
         addNotification("Sobre eliminado exitosamente", "success");
       }
-      navigate("/"); 
+      navigate("/");
     } catch (err) {
       setError(err.message);
-      addNotification(`Error: ${err.message}`, "error"); 
+      addNotification(`Error: ${err.message}`, "error");
     } finally {
       setLoading(false);
     }
