@@ -255,6 +255,7 @@ const SobrePage = () => {
             disabled={isFormDisabled}
             onChange={handleChange}
             value={formData}
+            action={action}
           />
           <LensTypeSection
             type="cerca"
@@ -262,6 +263,7 @@ const SobrePage = () => {
             disabled={isFormDisabled}
             onChange={handleChange}
             value={formData}
+            action={action}
           />
           <LensTypeSection
             type="bifocal"
@@ -269,6 +271,7 @@ const SobrePage = () => {
             disabled={isFormDisabled}
             onChange={handleChange}
             value={formData}
+            action={action}
           />
         </FormSection>
 
@@ -336,7 +339,7 @@ const SobrePage = () => {
             label="Seña"
             type="number"
             name="sena"
-            disabled={isFormDisabled}
+            disabled={isFormDisabled || !formData.total}
             onChange={handleChange}
             value={formData.sena || ""}
           />

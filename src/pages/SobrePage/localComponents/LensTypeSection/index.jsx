@@ -1,4 +1,4 @@
-import FormField from "@components/FormField";
+import FormField from "@components/FormField"; // eslint-disable-line no-unused-vars
 
 import { lensTypeSectionStyles } from "./Styles";
 
@@ -11,11 +11,76 @@ import { lensTypeSectionStyles } from "./Styles";
  * @param {boolean} props.disabled - Si los campos están deshabilitados.
  * @param {Function} props.onChange - El manejador de cambios para los inputs.
  * @param {object} props.value - El objeto de estado del formulario (`formData`).
+ * @param {'crear' | 'editar' | 'ver' | 'eliminar'} [props.action] - La acción actual de la página padre.
  * @returns {JSX.Element}
  */
-const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
+const LensTypeSection = ({
+  type,
+  label,
+  disabled,
+  onChange,
+  value,
+  action,
+}) => {
   const isOdSelected = value.tipo_lente_od === type;
   const isOiSelected = value.tipo_lente_oi === type;
+
+  /**
+   * Componente interno para evitar la repetición de los campos de graduación.
+   * @param {{eye: 'od' | 'oi', isSelected: boolean}} props
+   * @returns {JSX.Element}
+   */
+  const GraduationFields = ({ eye, isSelected }) => {
+    return (
+      <>
+        <div className={lensTypeSectionStyles.fieldSpan}>
+          <FormField
+            label="Esf"
+            type="number"
+            name={`${type}_${eye}_esf`}
+            onChange={onChange}
+            value={value[`${type}_${eye}_esf`] || ""}
+            disabled={
+              !isSelected ||
+              disabled ||
+              action === "ver" ||
+              action === "eliminar"
+            }
+          />
+        </div>
+        <div className={lensTypeSectionStyles.fieldSpan}>
+          <FormField
+            label="Cil"
+            type="number"
+            name={`${type}_${eye}_cil`}
+            onChange={onChange}
+            value={value[`${type}_${eye}_cil`] || ""}
+            disabled={
+              !isSelected ||
+              disabled ||
+              action === "ver" ||
+              action === "eliminar"
+            }
+          />
+        </div>
+        <div className={lensTypeSectionStyles.fieldSpan}>
+          <FormField
+            label="Eje"
+            type="number"
+            name={`${type}_${eye}_eje`}
+            onChange={onChange}
+            value={value[`${type}_${eye}_eje`] || ""}
+            disabled={
+              !isSelected ||
+              disabled ||
+              action === "ver" ||
+              action === "eliminar"
+            }
+          />
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className={lensTypeSectionStyles.container} key={type}>
@@ -28,50 +93,28 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             id={`check_oi_${type}`}
             name="tipo_lente_oi"
             value={type}
-            disabled={disabled}
-            onChange={onChange}
+            disabled={
+              disabled ||
+              action === "editar" ||
+              action === "ver" ||
+              action === "eliminar"
+            }
+            onClick={onChange}
             checked={isOiSelected}
             className={lensTypeSectionStyles.radioInput}
           />
           <label
             htmlFor={`check_oi_${type}`}
-            className={lensTypeSectionStyles.eyeLabel}
+            className={`${lensTypeSectionStyles.eyeLabel} ${
+              isOiSelected ? lensTypeSectionStyles.selected : ""
+            }`}
           >
             Ojo Izquierdo
           </label>
         </div>
 
         {/* Col 2, 3, 4: FormFields (OI) */}
-        <div className={lensTypeSectionStyles.fieldSpan}>
-          <FormField
-            label="Esf"
-            type="number"
-            name={`${type}_oi_esf`}
-            onChange={onChange}
-            value={value[`${type}_oi_esf`] || ""}
-            disabled={!isOiSelected || disabled}
-          />
-        </div>
-        <div className={lensTypeSectionStyles.fieldSpan}>
-          <FormField
-            label="Cil"
-            type="number"
-            name={`${type}_oi_cil`}
-            onChange={onChange}
-            value={value[`${type}_oi_cil`] || ""}
-            disabled={!isOiSelected || disabled}
-          />
-        </div>
-        <div className={lensTypeSectionStyles.fieldSpan}>
-          <FormField
-            label="Eje"
-            type="number"
-            name={`${type}_oi_eje`}
-            onChange={onChange}
-            value={value[`${type}_oi_eje`] || ""}
-            disabled={!isOiSelected || disabled}
-          />
-        </div>
+        <GraduationFields eye="oi" isSelected={isOiSelected} />
       </div>
       <div className={lensTypeSectionStyles.eyeGrid}>
         {/* Col 1: Radio Button (OD) */}
@@ -81,50 +124,28 @@ const LensTypeSection = ({ type, label, disabled, onChange, value }) => {
             id={`check_od_${type}`}
             name="tipo_lente_od"
             value={type}
-            disabled={disabled}
-            onChange={onChange}
+            disabled={
+              disabled ||
+              action === "editar" ||
+              action === "ver" ||
+              action === "eliminar"
+            }
+            onClick={onChange}
             checked={isOdSelected}
             className={lensTypeSectionStyles.radioInput}
           />
           <label
             htmlFor={`check_od_${type}`}
-            className={lensTypeSectionStyles.eyeLabel}
+            className={`${lensTypeSectionStyles.eyeLabel} ${
+              isOdSelected ? lensTypeSectionStyles.selected : ""
+            }`}
           >
             Ojo Derecho
           </label>
         </div>
 
         {/* Col 2, 3, 4: FormFields (OD) */}
-        <div className={lensTypeSectionStyles.fieldSpan}>
-          <FormField
-            label="Esf"
-            type="number"
-            name={`${type}_od_esf`}
-            onChange={onChange}
-            value={value[`${type}_od_esf`] || ""}
-            disabled={!isOdSelected || disabled}
-          />
-        </div>
-        <div className={lensTypeSectionStyles.fieldSpan}>
-          <FormField
-            label="Cil"
-            type="number"
-            name={`${type}_od_cil`}
-            onChange={onChange}
-            value={value[`${type}_od_cil`] || ""}
-            disabled={!isOdSelected || disabled}
-          />
-        </div>
-        <div className={lensTypeSectionStyles.fieldSpan}>
-          <FormField
-            label="Eje"
-            type="number"
-            name={`${type}_od_eje`}
-            onChange={onChange}
-            value={value[`${type}_od_eje`] || ""}
-            disabled={!isOdSelected || disabled}
-          />
-        </div>
+        <GraduationFields eye="od" isSelected={isOdSelected} />
       </div>
     </div>
   );

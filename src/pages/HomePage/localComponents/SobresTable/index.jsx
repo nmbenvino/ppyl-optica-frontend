@@ -25,6 +25,7 @@ const SobresTable = ({
         <tr>
           <th className={`${sobresTableStyles.tableHeader} w-12`}></th>
           <th className={sobresTableStyles.tableHeader}>Cliente</th>
+          <th className={sobresTableStyles.tableHeader}>DNI</th>
           <th className={sobresTableStyles.tableHeader}>N° Sobre</th>
           <th className={sobresTableStyles.tableHeader}>Fecha Creación</th>
         </tr>
@@ -69,6 +70,9 @@ const SobresTable = ({
               <td
                 className={sobresTableStyles.tableCell}
               >{`${sobre.cliente.customer_name} ${sobre.cliente.last_name}`}</td>
+              <td className={sobresTableStyles.tableCell}>
+                {sobre.cliente.dni}
+              </td>
               <td className={sobresTableStyles.tableCell}>
                 {sobre.sobre_number}
               </td>

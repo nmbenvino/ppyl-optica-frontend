@@ -1,10 +1,5 @@
 import { useEffect } from "react";
-import {
-  toastBaseStyle,
-  toastTypeStyles,
-  toastMessageStyle,
-  toastCloseButtonStyle,
-} from "./Styles.js";
+import toastStyle from "./Styles.js";
 
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -19,14 +14,11 @@ const Toast = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`${toastBaseStyle} ${
-        toastTypeStyles[type] || toastTypeStyles.info
+      className={`${toastStyle.base} ${
+        toastStyle.type[type] || toastStyle.type.info
       }`}
     >
-      <p className={toastMessageStyle}>{message}</p>
-      <button onClick={onClose} className={toastCloseButtonStyle}>
-        X
-      </button>
+      <p className={toastStyle.message}>{message}</p>
     </div>
   );
 };
