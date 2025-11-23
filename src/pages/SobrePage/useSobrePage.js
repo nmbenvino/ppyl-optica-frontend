@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { produce } from "immer";
 import {
   addSobre,
   updateSobre,
@@ -152,39 +153,72 @@ export const useSobrePage = (action, id) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
+    // --- INICIO DE LÓGICA PARA RADIO BUTTONS DE TIPO DE LENTE ---
+    if (type === "radio" && name.startsWith("tipo_lente_")) {
+      const radioValue = value;
+      setFormData(
+        produce((draft) => {
+          const eye = name.split("_")[2]; // 'od' u 'oi'
+          const currentSelection = draft[name];
+
+          if (currentSelection === radioValue) {
+            draft[name] = null; // Deseleccionar
+            draft[`${currentSelection}_${eye}_esf`] = "";
+            draft[`${currentSelection}_${eye}_cil`] = "";
+            draft[`${currentSelection}_${eye}_eje`] = "";
+          } else {
+            if (currentSelection) {
+              draft[`${currentSelection}_${eye}_esf`] = "";
+              draft[`${currentSelection}_${eye}_cil`] = "";
+              draft[`${currentSelection}_${eye}_eje`] = "";
+            }
+            draft[name] = radioValue;
+          }
+        })
+      );
+      return; // Salir para evitar el setFormData genérico de abajo
+    }
+    // --- FIN DE LÓGICA PARA RADIO BUTTONS ---
+
     // Limita el input de DNI a 8 caracteres
     if (name === "dni" && value.length > 8) {
       return;
     }
 
-    setFormData((prev) => {
-      let newState = { ...prev };
+    // --- INICIO DE VALIDACIÓN PARA TOTAL Y SEÑA ---
+    if (name === "total" || name === "sena") {
+      const numValue = Number(value);
 
-      // --- INICIO DE LA CORRECCIÓN ---
+      setFormData((prev) => {
+        const newFormData = { ...prev };
+        const currentTotal = Number(prev.total) || 0;
 
-      if (type === "radio") {
-        // Si se hace clic en un radio button que ya estaba seleccionado, deseleccionarlo.
-        if (prev[name] === value) {
-          newState[name] = null; // Deselecciona
-        } else {
-          // Si se selecciona un nuevo radio, primero limpiar los campos del anterior (si existía).
-          if (prev[name]) {
-            const eye = name.split("_")[2]; // 'od' u 'oi'
-            const oldType = prev[name]; // El tipo que estaba seleccionado antes
-            delete newState[`${oldType}_${eye}_esf`];
-            delete newState[`${oldType}_${eye}_cil`];
-            delete newState[`${oldType}_${eye}_eje`];
+        if (name === "total") {
+          const newTotal = Math.max(0, numValue); // No permitir negativos
+          newFormData.total = newTotal;
+          // Si el nuevo total es menor que la seña, ajustar la seña.
+          if (newTotal < (Number(prev.sena) || 0)) {
+            newFormData.sena = newTotal;
           }
-          newState[name] = value; // Selecciona el nuevo
+        } else if (name === "sena") {
+          // La seña no puede ser negativa ni mayor que el total.
+          if (numValue > currentTotal) {
+            addNotification(
+              "Se esta tratando de ingresar una seña mayor al monto total.",
+              "warning"
+            );
+          }
+          newFormData.sena = Math.max(0, Math.min(numValue, currentTotal));
         }
-      } else {
-        // Para cualquier otro tipo de input (text, checkbox, etc.)
-        newState[name] = type === "checkbox" ? checked : value;
-      }
+        return newFormData;
+      });
+      return; // Salir para evitar el setFormData de abajo
+    }
+    // --- FIN DE VALIDACIÓN PARA TOTAL Y SEÑA ---
 
-      // --- FIN DE LA CORRECCIÓN ---
-
-      return newState;
+    setFormData((prev) => {
+      // Manejo para todos los demás inputs (texto, número, checkbox, etc.)
+      return { ...prev, [name]: type === "checkbox" ? checked : value };
     });
 
     // Nuevo: si el usuario cambia datos del cliente existente, marcarlo como modificado

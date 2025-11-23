@@ -89,8 +89,18 @@ export const useHomePage = () => {
     if (name === "dni" && value.length > 8) {
       return;
     }
-
-    setFilters((prev) => ({ ...prev, [name]: value }));
+    setFilters((prev) => {
+      const newFilters = { ...prev, [name]: value };
+      // Si se borra la fecha de inicio, también se borra la de fin.
+      if (name === "date_ini" && !value) {
+        newFilters.date_fin = "";
+      }
+      // Si se borra la fecha de fin, también se borra la de inicio.
+      if (name === "date_fin" && !value) {
+        newFilters.date_ini = "";
+      }
+      return newFilters;
+    });
   };
 
   /**

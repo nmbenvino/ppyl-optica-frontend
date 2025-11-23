@@ -133,6 +133,8 @@ const HomePage = () => {
           value={filters.date_fin}
           onChange={handleFilterChange}
           max={today}
+          min={filters.date_ini}
+          disabled={!filters.date_ini}
         />
         <Button
           onClick={handleSearch}
