@@ -36,7 +36,6 @@ const apiFetch = async (endpoint, options = {}) => {
 
 /**
  * Obtiene sobres filtrando por DNI y/o rango de fechas.
- * Corresponde al endpoint `/getSobre`.
  * @param {Object} filters - Objeto con los filtros.
  * @param {number|null} filters.dni - DNI del cliente a buscar.
  * @param {string|null} filters.date_ini - Fecha de inicio (opcional, YYYY-MM-DD).
@@ -50,19 +49,18 @@ export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
   if (date_fin) params.append("fecha_fin", date_fin);
 
   const queryString = params.toString();
-  return apiFetch(`/sobre/getSobre${queryString ? `?${queryString}` : ""}`, {
+  return apiFetch(`/sobre${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
 };
 
 /**
  * Crea un nuevo sobre.
- * Corresponde al endpoint `/add_sobre`.
  * @param {Object} data - Los datos del sobre, cliente y lentes, según la especificación de la API.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const addSobre = (data) => {
-  return apiFetch("/sobre/add_sobre", {
+  return apiFetch("/sobre", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -70,14 +68,13 @@ export const addSobre = (data) => {
 
 /**
  * Elimina un sobre por su número.
- * Corresponde al endpoint `/deleteSobre`.
  * @param {Object} params - Los parámetros para eliminar.
  * @param {number} params.dni - El DNI del cliente asociado al sobre.
  * @param {number} params.sobre_number - El número del sobre a eliminar.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const deleteSobre = ({ dni, sobre_number }) => {
-  return apiFetch("/sobre/deleteSobre", {
+  return apiFetch("/sobre", {
     method: "DELETE",
     body: JSON.stringify({ dni, sobre_number }),
   });
@@ -85,13 +82,12 @@ export const deleteSobre = ({ dni, sobre_number }) => {
 
 /**
  * Actualiza un sobre existente.
- * Corresponde al endpoint `/update_sobre`.
  * @param {number} sobre_number - El número del sobre a actualizar. //Cambio
  * @param {Object} data - Los datos a actualizar.
  * @returns {Promise<Object>} El mensaje de éxito.
  */
 export const updateSobre = (sobre_number, data) => {
-  return apiFetch(`/sobre/update_sobre/${sobre_number}`, {
+  return apiFetch(`/sobre/${sobre_number}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
@@ -99,7 +95,6 @@ export const updateSobre = (sobre_number, data) => {
 
 /**
  * Obtiene el siguiente número de sobre disponible.
- * Corresponde al endpoint `/getNumeroSobre`.
  * @returns {Promise<number>} El siguiente número de sobre.
  */
 export const getNumeroSobre = () => {
@@ -110,11 +105,10 @@ export const getNumeroSobre = () => {
 
 /**
  * Obtiene una lista de todos los clientes.
- * Corresponde al endpoint `/customers`.
  * @returns {Promise<Customer[]>} Una lista de todos los clientes.
  */
 export const getCustomers = () => {
-  return apiFetch(`/customers`, {
+  return apiFetch(`/customer`, {
     method: "GET",
   });
 };

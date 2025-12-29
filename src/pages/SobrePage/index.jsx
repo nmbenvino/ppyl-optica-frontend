@@ -12,6 +12,7 @@ import FormSection from "@components/FormSection";
 import ToggleSwitch from "@components/ToggleSwitch";
 import Button from "@components/Button";
 import LensTypeSection from "./localComponents/LensTypeSection";
+import DeleteModal from "./localComponents/DeleteModal";
 
 /**
  * Página para crear, ver, editar o eliminar un Sobre.
@@ -31,6 +32,9 @@ const SobrePage = () => {
     isNewCustomer,
     customers,
     handleSubmit,
+    showDeleteModal,
+    setShowDeleteModal,
+    handleDeleteConfirmation,
   } = useSobrePage(action, id);
 
   /**
@@ -352,6 +356,13 @@ const SobrePage = () => {
           />
         </FormSection>
       </form>
+
+      {/* Modal de confirmación para eliminar si no pasaron 10 años */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirmation}
+      />
     </div>
   );
 };

@@ -9,7 +9,6 @@ import {
   getCustomers,
 } from "@services/sobres";
 import { useNotification } from "@components/Notification/useNotification.js";
-import { getSobres } from "@services/sobres"; // Se usará getSobres en el futuro
 
 /**
  * Hook para manejar la lógica de la página de gestión de Sobres.
@@ -50,6 +49,7 @@ export const useSobrePage = (action, id) => {
   const sobreDesdeEstado = location.state?.sobre; // Accede al sobre enviado desde HomePage
   const { addNotification } = useNotification();
   const [customers, setCustomers] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isFormDisabled = action === "ver" || action === "eliminar";
 
@@ -64,10 +64,10 @@ export const useSobrePage = (action, id) => {
       // Información General
       fecha: sobre.sobre_date,
       numero_sobre: sobre.sobre_number,
-      cliente: `${sobre.cliente.customer_name} ${sobre.cliente.last_name}`,
-      domicilio: sobre.cliente.address,
-      dni: sobre.cliente.dni,
-      telefono: sobre.cliente.phone,
+      cliente: `${sobre.customer.customer_name} ${sobre.customer.last_name}`,
+      domicilio: sobre.customer.address,
+      dni: sobre.customer.dni,
+      telefono: sobre.customer.phone,
 
       // Otros Campos
       obra_social: sobre.social_work,
@@ -106,8 +106,12 @@ export const useSobrePage = (action, id) => {
       setLoading(true);
       try {
         // Siempre se obtienen los clientes para el selector
-        const customersData = await getCustomers();
-        setCustomers(customersData);
+        try {
+          const customersData = await getCustomers();
+          setCustomers(customersData);
+        } catch (customerErr) {
+          console.warn("No se pudo cargar la lista de clientes:", customerErr);
+        }
 
         if (action === "crear") {
           // Si estamos creando, obtenemos el siguiente número de sobre.
@@ -119,9 +123,9 @@ export const useSobrePage = (action, id) => {
         } else if (id && sobreDesdeEstado) {
           // Para editar/ver/eliminar, usamos los datos pasados por el estado de la navegación.
           setFormData(transformSobreToFormData(sobreDesdeEstado));
-          if (sobreDesdeEstado.cliente) {
+          if (sobreDesdeEstado.customer) {
             setIsNewCustomer(false);
-            setOriginalDni(sobreDesdeEstado.cliente.dni);
+            setOriginalDni(sobreDesdeEstado.customer.dni);
           }
         } else if (id && !sobreDesdeEstado) {
           // Si hay un ID pero no hay estado (ej: recarga de página), no podemos mostrar datos.
@@ -350,7 +354,21 @@ export const useSobrePage = (action, id) => {
     // CASO 2: Cliente existente sin cambios
     else if (!isCustomerModified) {
       payload.edit = false;
-      payload.dni = Number(data.dni);
+      // Buscamos los datos exactos en la lista para evitar errores de split en nombres compuestos
+      const existingCustomer = customers.find(
+        (c) => c.dni === Number(data.dni)
+      );
+      payload.customer = {
+        customer_name:
+          existingCustomer?.customer_name || data.cliente?.split(" ")[0] || "",
+        last_name:
+          existingCustomer?.last_name ||
+          data.cliente?.split(" ").slice(1).join(" ") ||
+          "",
+        dni: Number(data.dni) || 0,
+        address: data.domicilio || "",
+        phone: data.telefono || "",
+      };
     }
 
     // CASO 3: Cliente existente con cambios
@@ -427,6 +445,27 @@ export const useSobrePage = (action, id) => {
       },
     };
     return payload;
+  };
+
+  /**
+   * Ejecuta la eliminación del sobre después de la confirmación.
+   */
+  const handleDeleteConfirmation = async () => {
+    setShowDeleteModal(false);
+    setLoading(true);
+    try {
+      await deleteSobre({
+        dni: formData.dni,
+        sobre_number: formData.numero_sobre,
+      });
+      addNotification("Sobre eliminado exitosamente", "success");
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+      addNotification(`Error: ${err.message}`, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**
@@ -520,6 +559,19 @@ export const useSobrePage = (action, id) => {
         await updateSobre(sobreId, payload);
         addNotification("Sobre actualizado exitosamente", "success");
       } else if (action === "eliminar") {
+        // Verificar si pasaron 10 años
+        const [year, month, day] = formData.fecha.split("-").map(Number);
+        const sobreDate = new Date(year, month - 1, day);
+        const tenYearsAgo = new Date();
+        tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10);
+        tenYearsAgo.setHours(0, 0, 0, 0); // Normalizar hora para comparación justa
+
+        if (sobreDate > tenYearsAgo) {
+          setLoading(false);
+          setShowDeleteModal(true);
+          return; // Detener ejecución para esperar confirmación
+        }
+
         await deleteSobre({
           dni: formData.dni,
           sobre_number: formData.numero_sobre,
@@ -546,5 +598,8 @@ export const useSobrePage = (action, id) => {
     customers,
     handleCustomerSelect,
     handleSubmit,
+    showDeleteModal,
+    setShowDeleteModal,
+    handleDeleteConfirmation,
   };
 };

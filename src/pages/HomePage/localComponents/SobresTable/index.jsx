@@ -67,11 +67,11 @@ const SobresTable = ({
                   className={sobresTableStyles.radioInput}
                 />
               </td>
-              <td
-                className={sobresTableStyles.tableCell}
-              >{`${sobre.cliente.customer_name} ${sobre.cliente.last_name}`}</td>
               <td className={sobresTableStyles.tableCell}>
-                {sobre.cliente.dni}
+                {`${sobre.customer?.customer_name} ${sobre.customer?.last_name}`}
+              </td>
+              <td className={sobresTableStyles.tableCell}>
+                {sobre.customer?.dni}
               </td>
               <td className={sobresTableStyles.tableCell}>
                 {sobre.sobre_number}
