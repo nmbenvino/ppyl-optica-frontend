@@ -49,7 +49,7 @@ export const getSobres = ({ dni = null, date_ini = null, date_fin = null }) => {
   if (date_fin) params.append("fecha_fin", date_fin);
 
   const queryString = params.toString();
-  return apiFetch(`/sobre${queryString ? `?${queryString}` : ""}`, {
+  return apiFetch(`/sobre/${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
 };
@@ -108,7 +108,7 @@ export const getNumeroSobre = () => {
  * @returns {Promise<Customer[]>} Una lista de todos los clientes.
  */
 export const getCustomers = () => {
-  return apiFetch(`/customer`, {
+  return apiFetch(`/customer/customers`, {
     method: "GET",
   });
 };
